@@ -5,6 +5,11 @@
 #define _jcfb_h_
 
 
+#include "jcfb/pixel.h"
+#include "jcfb/bitmap.h"
+#include "jcfb/bitmap-loading.h"
+
+
 /*
  * Initialize the framebuffer.
  */
@@ -21,6 +26,12 @@ void jcfb_stop();
  * Clear the framebuffer screen to black.
  */
 void jcfb_clear();
+
+
+/*
+ * Get the framebuffer bitmap address.
+ */
+bitmap_t* jcfb_get_bitmap();
 
 
 #endif

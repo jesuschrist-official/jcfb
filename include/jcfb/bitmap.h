@@ -74,4 +74,10 @@ void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color);
 void bitmap_clear(bitmap_t* bmp, pixel_t color);
 
 
+/*
+ * Blit the `src` bitmap at the given position of `dest` bitmap.
+ */
+void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
+
+
 #endif

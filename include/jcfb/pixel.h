@@ -39,6 +39,23 @@ typedef struct pixfmt {
 
 
 /*
+ * Most common pixel formats enumeration
+ */
+typedef enum {
+    PIXFMT_RGB16,
+    PIXFMT_RGB24,
+    PIXFMT_RGBA32,
+    PIXFMT_ARGB32
+} pixfmt_enum_t;
+
+
+/*
+ * Returns the pixfmt structure of the given type.
+ */
+pixfmt_t pixfmt_get(pixfmt_enum_t which);
+
+
+/*
  * Pixel
  *
  * Simple scalar type to represents a pixel. Pixel value depends of its

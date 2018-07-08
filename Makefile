@@ -32,11 +32,13 @@ $(DOBJ)/%.o: $(DSRC)/%.c
 
 $(JCFB): $(DOBJ)/pixel.o \
          $(DOBJ)/jcfb.o \
-         $(DOBJ)/bitmap.o
+         $(DOBJ)/bitmap.o \
+         $(DOBJ)/bitmap-loading.o
 	$(AR) rvs $@ $^
 
 $(SAMPLE): $(JCFB) $(DSAMPLE)/sample.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb
+	cp sample/tiger.bmp $(DBUILD)
 
 tests: $(DBUILD)/pixel.test
 

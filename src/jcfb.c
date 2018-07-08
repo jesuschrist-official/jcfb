@@ -127,3 +127,8 @@ void jcfb_stop() {
 void jcfb_clear() {
     bitmap_clear(&_FB.bmp, 0x00000000);
 }
+
+
+bitmap_t* jcfb_get_bitmap() {
+    return &_FB.bmp;
+}

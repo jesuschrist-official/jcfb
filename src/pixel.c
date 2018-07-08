@@ -3,6 +3,39 @@
 #include "jcfb/pixel.h"
 
 
+static const pixfmt_t _PIXFMTS[] = {
+     [PIXFMT_RGB16] = {
+        .bpp = 16,
+        // XXX We chose red first, but maybe it's a wrong choice!
+        //     Best would be to detect at bitmap loading if it is a LSB pixel
+        //     format or not ?
+        .offs = {11, 5, 0, 0},
+        .sizes = {5, 6, 5, 0},
+     },
+     [PIXFMT_RGB24] = {
+        .bpp = 24,
+        .offs = {16, 8, 0, 0},
+        .sizes = {8, 8, 8, 0},
+     },
+     [PIXFMT_RGBA32] = {
+        .bpp = 32,
+        .offs = {24, 16, 8, 0},
+        .sizes = {8, 8, 8, 8},
+     },
+     [PIXFMT_ARGB32] = {
+        .bpp = 32,
+        .offs = {16, 8, 0, 24},
+        .sizes = {8, 8, 8, 8},
+     },
+};
+
+
+pixfmt_t pixfmt_get(pixfmt_enum_t which) {
+    assert(which >= 0 && which < sizeof(_PIXFMTS) / sizeof(pixfmt_t));
+    return _PIXFMTS[which];
+}
+
+
 static uint32_t _comp_conv_32(uint32_t off, uint32_t size, uint32_t comp) {
     assert(!(comp & 0xffffff00));
     if (8 > size) {

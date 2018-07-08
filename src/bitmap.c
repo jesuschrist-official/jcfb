@@ -59,3 +59,21 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color) {
         }
     }
 }
+
+
+void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
+    for (int sy = 0; sy < src->h; sy++) {
+        for (int sx = 0; sx < src->w; sx++) {
+            int dx = x + sx;
+            int dy = y + sy;
+            uint8_t* src_addr = src->mem8
+                              + (sy * src->w + sx) * (src->fmt.bpp / 8);
+            uint8_t* dst_addr = dst->mem8
+                              + (dy * dst->w + dx) * (dst->fmt.bpp / 8);
+            pixel_t src_color = 0;
+            memcpy(&src_color, src_addr, src->fmt.bpp / 8);
+            pixel_t dst_color = pixel_conv(&src->fmt, &dst->fmt, src_color);
+            memcpy(dst_addr, &dst_color, dst->fmt.bpp / 8);
+        }
+    }
+}
