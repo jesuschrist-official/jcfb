@@ -1,0 +1,13 @@
+
+
+                            JESUS CHIST'S FRAMEBUFFER LIBRARY
+
+
+JCFB is a Linux framebuffer libray. It allows to access framebuffer memory
+and provides basics functions and types to develop nice graphic programs
+without the need of X11.
+
+JCFB provides methods to :
+- Start and configure the Linux framebuffer device ;
+- Draw primitives ;
+- Load manipulate and draw bitmap ;
