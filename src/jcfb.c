@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -7,17 +8,13 @@
 
 #include "jcfb/jcfb.h"
 #include "jcfb/pixel.h"
+#include "jcfb/bitmap.h"
 
 
 typedef struct fb {
     int fd;
-    int w, h;
-    pixfmt_t fmt;
-    union {
-        void* mem;
-        uint8_t* mem8;
-        uint16_t* mem16;
-    };
+    void* mem;
+    bitmap_t bmp;
 } fb_t;
 
 
@@ -25,7 +22,7 @@ static fb_t _FB;
 
 
 static size_t _FB_memsize() {
-    return (_FB.fmt.bpp * _FB.w * _FB.h) / 8;
+    return bitmap_memsize(&_FB.bmp);
 }
 
 
@@ -52,9 +49,9 @@ int jcfb_start() {
         goto error;
     }
 
-    _FB.w = var_si.xres;
-    _FB.h = var_si.yres;
-    _FB.fmt = (pixfmt_t){
+    int w = var_si.xres;
+    int h = var_si.yres;
+    pixfmt_t fmt = (pixfmt_t){
         .bpp = var_si.bits_per_pixel,
         .offs = {
             [COMP_RED] = var_si.red.offset,
@@ -69,10 +66,11 @@ int jcfb_start() {
             [COMP_ALPHA] = var_si.transp.length,
         }
     };
+    assert((var_si.bits_per_pixel >= 8) && "BPP >= 8 is mandatory");
 
 #ifdef DEBUG
     printf(
-        "_FB = {\n"
+        "_FB.bmp = {\n"
         "   .w = %d,\n"
         "   .h = %d,\n"
         "   .fmt = {\n"
@@ -81,26 +79,27 @@ int jcfb_start() {
         "       .lengths = {%u, %u, %u, %u}\n"
         "   }\n"
         "}\n",
-        _FB.w, _FB.h,
-        _FB.fmt.bpp,
-        _FB.fmt.offs[0], _FB.fmt.offs[1], _FB.fmt.offs[2], _FB.fmt.offs[3],
-        _FB.fmt.sizes[0], _FB.fmt.sizes[1], _FB.fmt.sizes[2], _FB.fmt.sizes[3]
+        w, h,
+        fmt.bpp,
+        fmt.offs[0], fmt.offs[1], fmt.offs[2], fmt.offs[3],
+        fmt.sizes[0], fmt.sizes[1], fmt.sizes[2], fmt.sizes[3]
     );
 #endif
 
     var_si.xoffset = 0;
     var_si.yoffset = 0;
     if (ioctl(_FB.fd, FBIOPAN_DISPLAY, &var_si) < 0) {
-        fprintf(stderr, "Unable to modify the framebuffer offset");
+        fprintf(stderr, "Unable to modify the framebuffer offset\n");
         goto error;
     }
 
-    _FB.mem = mmap(NULL, _FB_memsize(), PROT_READ | PROT_WRITE, MAP_SHARED,
-                   _FB.fd, 0);
+    _FB.mem = mmap(NULL, (w * h * fmt.bpp) / 8, PROT_READ | PROT_WRITE,
+                   MAP_SHARED, _FB.fd, 0);
     if (_FB.mem == MAP_FAILED) {
-        fprintf(stderr, "Unable to map framebuffer into program memory");
+        fprintf(stderr, "Unable to map framebuffer into program memory\n");
         goto error;
     }
+    bitmap_init_from_memory(&_FB.bmp, &fmt, w, h, _FB.mem);
 
     jcfb_clear();
 
@@ -121,12 +120,10 @@ void jcfb_stop() {
         close(_FB.fd);
         _FB.fd = -1;
     }
+    bitmap_wipe(&_FB.bmp);
 }
 
 
 void jcfb_clear() {
-    pixel_t p = pixel(&_FB.fmt, 0x00000000);
-    for (size_t i = 0; i < _FB.w * _FB.h; i++) {
-        _FB.mem16[i] = p;
-    }
+    bitmap_clear(&_FB.bmp, 0x00000000);
 }

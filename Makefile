@@ -31,7 +31,8 @@ $(DOBJ)/%.o: $(DSRC)/%.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 $(JCFB): $(DOBJ)/pixel.o \
-         $(DOBJ)/jcfb.o
+         $(DOBJ)/jcfb.o \
+         $(DOBJ)/bitmap.o
 	$(AR) rvs $@ $^
 
 $(SAMPLE): $(JCFB) $(DSAMPLE)/sample.c
