@@ -25,7 +25,7 @@ JCFB=$(DBUILD)/libjcfb.a
 SAMPLE=$(DBUILD)/sample.exe
 
 # Rules
-all: $(DBUILD) $(JCFB) $(SAMPLE)
+all: $(DBUILD) $(JCFB) $(SAMPLE) tests
 
 $(DOBJ)/%.o: $(DSRC)/%.c
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -36,6 +36,11 @@ $(JCFB): $(DOBJ)/pixel.o \
 
 $(SAMPLE): $(JCFB) $(DSAMPLE)/sample.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb
+
+tests: $(DBUILD)/pixel.test
+
+$(DBUILD)/pixel.test: $(DSRC)/pixel.c
+	$(CC) $(CFLAGS) -DTEST $^ -o $@
 
 $(DBUILD):
 	mkdir -p $(DBUILD)

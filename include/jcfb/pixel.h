@@ -53,4 +53,10 @@ typedef uint32_t pixel_t;
 pixel_t pixel(const pixfmt_t* fmt, pixel_t rgba32);
 
 
+/*
+ * Convert a pixel from any format to a pixel of any format.
+ */
+pixel_t pixel_conv(const pixfmt_t* in_fmt, const pixfmt_t* out_fmt, pixel_t p);
+
+
 #endif
