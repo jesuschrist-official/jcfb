@@ -30,8 +30,16 @@ void jcfb_clear();
 
 /*
  * Get the framebuffer bitmap address.
+ * This bitmap should be pointing on a backuffer, thus, you're drawing
+ * procedure shouldn't be visible until `jcfb_refresh` is called.
  */
 bitmap_t* jcfb_get_bitmap();
+
+
+/*
+ * Refresh the screen with the backbufferr.
+ */
+void jcfb_refresh();
 
 
 #endif

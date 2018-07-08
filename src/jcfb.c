@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
@@ -15,6 +16,10 @@ typedef struct fb {
     int fd;
     void* mem;
     bitmap_t bmp;
+
+    int page, page_max;
+    struct fb_var_screeninfo var_si;
+    struct fb_fix_screeninfo fix_si;
 } fb_t;
 
 
@@ -22,7 +27,23 @@ static fb_t _FB;
 
 
 static size_t _FB_memsize() {
-    return bitmap_memsize(&_FB.bmp);
+    return (  _FB.var_si.xres_virtual
+            * _FB.var_si.yres_virtual
+            * _FB.var_si.bits_per_pixel) / 8;
+}
+
+static size_t _FB_pagesize() {
+    return (_FB.var_si.xres * _FB.var_si.yres * _FB.var_si.bits_per_pixel) / 8;
+}
+
+static void _set_page(int page) {
+    _FB.page = page;
+    _FB.var_si.xoffset = 0;
+    _FB.var_si.yoffset = page * _FB.var_si.yres;
+    // TODO error handling ?
+    ioctl(_FB.fd, FBIOPAN_DISPLAY, &_FB.var_si);
+
+    _FB.bmp.mem8 = _FB.mem + ((page + 1) % 2) * _FB_pagesize();
 }
 
 
@@ -86,22 +107,20 @@ int jcfb_start() {
     );
 #endif
 
-    var_si.xoffset = 0;
-    var_si.yoffset = 0;
-    if (ioctl(_FB.fd, FBIOPAN_DISPLAY, &var_si) < 0) {
-        fprintf(stderr, "Unable to modify the framebuffer offset\n");
-        goto error;
-    }
+    memcpy(&_FB.fix_si, &fix_si, sizeof(struct fb_fix_screeninfo));
+    memcpy(&_FB.var_si, &var_si, sizeof(struct fb_var_screeninfo));
 
-    _FB.mem = mmap(NULL, (w * h * fmt.bpp) / 8, PROT_READ | PROT_WRITE,
-                   MAP_SHARED, _FB.fd, 0);
+    _FB.mem = mmap(NULL, _FB_memsize(),
+                   PROT_READ | PROT_WRITE, MAP_SHARED, _FB.fd, 0);
     if (_FB.mem == MAP_FAILED) {
         fprintf(stderr, "Unable to map framebuffer into program memory\n");
         goto error;
     }
     bitmap_init_from_memory(&_FB.bmp, &fmt, w, h, _FB.mem);
 
-    jcfb_clear();
+    memset(_FB.mem, 0, _FB_memsize());
+    _FB.page_max = var_si.yres_virtual / var_si.yres;
+    _set_page(0);
 
     return 0;
 
@@ -131,4 +150,10 @@ void jcfb_clear() {
 
 bitmap_t* jcfb_get_bitmap() {
     return &_FB.bmp;
+}
+
+
+void jcfb_refresh() {
+    assert(_FB.page_max > 1);
+    _set_page((_FB.page + 1) % 2);
 }

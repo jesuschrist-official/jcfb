@@ -5,6 +5,7 @@
  * capabilities the library has.
  */
 #include <stdio.h>
+#include <unistd.h>
 #include "jcfb/jcfb.h"
 
 
@@ -18,8 +19,12 @@ int main(int argc, char** argv) {
     if (bitmap_load(&tiger, "tiger.bmp") < 0) {
         return 1;
     }
-    bitmap_blit(jcfb_get_bitmap(), &tiger, 160, 120);
-    getc(stdin);
+    while (1) {
+        bitmap_clear(jcfb_get_bitmap(), 0x000000ff);
+        bitmap_blit(jcfb_get_bitmap(), &tiger, 160, 120);
+        jcfb_refresh();
+        usleep(1E4);
+    }
 
     bitmap_wipe(&tiger);
 
