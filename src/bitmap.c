@@ -61,7 +61,31 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color) {
 }
 
 
-void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
+static size_t _get_pixel_size(const bitmap_t* bmp) {
+    return bmp->fmt.bpp / 8;
+}
+
+
+static size_t _get_line_size(const bitmap_t* bmp) {
+    return bmp->w * _get_pixel_size(bmp);
+}
+
+
+static const void* _get_pixel_addr(const bitmap_t* bmp, int x, int y) {
+    return bmp->mem + (y * _get_line_size(bmp) + x * _get_pixel_size(bmp));
+}
+
+
+static void _fast_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
+    for (int sy = 0; sy < src->h; sy++) {
+        const void* src_addr = _get_pixel_addr(src, 0, sy);
+        void* dst_addr = (void*)_get_pixel_addr(dst, x, sy + y);
+        memcpy(dst_addr, src_addr, _get_line_size(src));
+    }
+}
+
+
+static void _slow_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
     for (int sy = 0; sy < src->h; sy++) {
         for (int sx = 0; sx < src->w; sx++) {
             int dx = x + sx;
@@ -75,5 +99,14 @@ void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
             pixel_t dst_color = pixel_conv(&src->fmt, &dst->fmt, src_color);
             memcpy(dst_addr, &dst_color, dst->fmt.bpp / 8);
         }
+    }
+}
+
+
+void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
+    if (dst->fmt.id == src->fmt.id) {
+        _fast_blit(dst, src, x, y);
+    } else {
+        _slow_blit(dst, src, x, y);
     }
 }

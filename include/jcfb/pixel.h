@@ -22,6 +22,17 @@ typedef enum {
     COMP_MAX,
 } component_t;
 
+/*
+ * Most common pixel formats enumeration
+ */
+typedef enum {
+    PIXFMT_FB = 0,
+    PIXFMT_RGB16,
+    PIXFMT_RGB24,
+    PIXFMT_RGBA32,
+    PIXFMT_ARGB32
+} pixfmt_id_t;
+
 
 /*
  * Pixel format
@@ -31,6 +42,7 @@ typedef enum {
  * This structure can be used to compute pixel conversions.
  */
 typedef struct pixfmt {
+    pixfmt_id_t id;           /* Format ID */
     size_t bpp;               /* Bits per pixel */
     uint32_t offs[COMP_MAX];  /* Components offset */
     uint32_t sizes[COMP_MAX]; /* Components length */
@@ -38,21 +50,17 @@ typedef struct pixfmt {
 } pixfmt_t;
 
 
-/*
- * Most common pixel formats enumeration
- */
-typedef enum {
-    PIXFMT_RGB16,
-    PIXFMT_RGB24,
-    PIXFMT_RGBA32,
-    PIXFMT_ARGB32
-} pixfmt_enum_t;
-
 
 /*
  * Returns the pixfmt structure of the given type.
  */
-pixfmt_t pixfmt_get(pixfmt_enum_t which);
+pixfmt_t pixfmt_get(pixfmt_id_t which);
+
+
+/*
+ * Set the pixfmt used by the framebuffer
+ */
+void pixfmt_set_fb(const pixfmt_t* fmt);
 
 
 /*

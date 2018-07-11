@@ -1,10 +1,13 @@
 #include <assert.h>
+#include <string.h>
 
 #include "jcfb/pixel.h"
 
 
-static const pixfmt_t _PIXFMTS[] = {
+static pixfmt_t _PIXFMTS[] = {
+     [PIXFMT_FB] = {0},
      [PIXFMT_RGB16] = {
+        .id = PIXFMT_RGB16,
         .bpp = 16,
         // XXX We chose red first, but maybe it's a wrong choice!
         //     Best would be to detect at bitmap loading if it is a LSB pixel
@@ -13,16 +16,19 @@ static const pixfmt_t _PIXFMTS[] = {
         .sizes = {5, 6, 5, 0},
      },
      [PIXFMT_RGB24] = {
+        .id = PIXFMT_RGB24,
         .bpp = 24,
         .offs = {16, 8, 0, 0},
         .sizes = {8, 8, 8, 0},
      },
      [PIXFMT_RGBA32] = {
+        .id = PIXFMT_RGBA32,
         .bpp = 32,
         .offs = {24, 16, 8, 0},
         .sizes = {8, 8, 8, 8},
      },
      [PIXFMT_ARGB32] = {
+        .id = PIXFMT_ARGB32,
         .bpp = 32,
         .offs = {16, 8, 0, 24},
         .sizes = {8, 8, 8, 8},
@@ -30,9 +36,15 @@ static const pixfmt_t _PIXFMTS[] = {
 };
 
 
-pixfmt_t pixfmt_get(pixfmt_enum_t which) {
+pixfmt_t pixfmt_get(pixfmt_id_t which) {
     assert(which >= 0 && which < sizeof(_PIXFMTS) / sizeof(pixfmt_t));
     return _PIXFMTS[which];
+}
+
+
+void pixfmt_set_fb(const pixfmt_t* fmt) {
+    assert(fmt->id == PIXFMT_FB);
+    _PIXFMTS[PIXFMT_FB] = *fmt;
 }
 
 
@@ -71,6 +83,9 @@ static uint32_t _comp_conv(uint32_t in_off, uint32_t in_size,
 
 pixel_t pixel_conv(const pixfmt_t* in_fmt, const pixfmt_t* out_fmt, pixel_t p)
 {
+    if (in_fmt->id == out_fmt->id) {
+        return p;
+    }
 #define CONV(_i) \
     _comp_conv(in_fmt->offs[_i], in_fmt->sizes[_i], \
                out_fmt->offs[_i], out_fmt->sizes[_i], p)

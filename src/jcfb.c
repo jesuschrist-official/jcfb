@@ -84,6 +84,7 @@ int jcfb_start() {
     int w = var_si.xres;
     int h = var_si.yres;
     pixfmt_t fmt = (pixfmt_t){
+        .id = PIXFMT_FB,
         .bpp = var_si.bits_per_pixel,
         .offs = {
             [COMP_RED] = var_si.red.offset,
@@ -99,6 +100,7 @@ int jcfb_start() {
         }
     };
     assert((var_si.bits_per_pixel >= 8) && "BPP >= 8 is mandatory");
+    pixfmt_set_fb(&fmt);
 
 #ifdef DEBUG
     printf(
