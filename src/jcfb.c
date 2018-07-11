@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -20,6 +21,7 @@ typedef struct fb {
     int page, page_max;
     struct fb_var_screeninfo var_si;
     struct fb_fix_screeninfo fix_si;
+    bitmap_t backbuffer;    // Used only when max_page = 1
 } fb_t;
 
 
@@ -32,18 +34,25 @@ static size_t _FB_memsize() {
             * _FB.var_si.bits_per_pixel) / 8;
 }
 
+
 static size_t _FB_pagesize() {
     return (_FB.var_si.xres * _FB.var_si.yres * _FB.var_si.bits_per_pixel) / 8;
 }
 
-static void _set_page(int page) {
+
+static void _FB_set_page(int page) {
+    assert(_FB.page_max > 1);
     _FB.page = page;
     _FB.var_si.xoffset = 0;
     _FB.var_si.yoffset = page * _FB.var_si.yres;
     // TODO error handling ?
     ioctl(_FB.fd, FBIOPAN_DISPLAY, &_FB.var_si);
-
     _FB.bmp.mem8 = _FB.mem + ((page + 1) % 2) * _FB_pagesize();
+}
+
+
+static bool _FB_has_double_buffering() {
+    return _FB.page_max > 1;
 }
 
 
@@ -51,6 +60,8 @@ int jcfb_start() {
     _FB = (fb_t){
         .fd = -1,
         .mem = NULL,
+        .page = 0,
+        .page_max = 0,
     };
 
     _FB.fd = open("/dev/fb0", O_RDWR);
@@ -120,7 +131,11 @@ int jcfb_start() {
 
     memset(_FB.mem, 0, _FB_memsize());
     _FB.page_max = var_si.yres_virtual / var_si.yres;
-    _set_page(0);
+    if (_FB_has_double_buffering()) {
+        _FB_set_page(0);
+    } else {
+        bitmap_init(&_FB.backbuffer, &fmt, w, h);
+    }
 
     return 0;
 
@@ -131,13 +146,16 @@ int jcfb_start() {
 
 
 void jcfb_stop() {
-    if (_FB.mem) {
+    if (_FB.mem && _FB.mem != MAP_FAILED) {
         munmap(_FB.mem, _FB_memsize());
         _FB.mem = NULL;
     }
     if (_FB.fd >= 0) {
         close(_FB.fd);
         _FB.fd = -1;
+    }
+    if (!_FB_has_double_buffering()) {
+        bitmap_wipe(&_FB.backbuffer);
     }
     bitmap_wipe(&_FB.bmp);
 }
@@ -149,11 +167,18 @@ void jcfb_clear() {
 
 
 bitmap_t* jcfb_get_bitmap() {
-    return &_FB.bmp;
+    if (_FB_has_double_buffering()) {
+        return &_FB.bmp;
+    } else {
+        return &_FB.backbuffer;
+    }
 }
 
 
 void jcfb_refresh() {
-    assert(_FB.page_max > 1);
-    _set_page((_FB.page + 1) % 2);
+    if (_FB_has_double_buffering()) {
+        _FB_set_page((_FB.page + 1) % 2);
+    } else {
+        memcpy(_FB.bmp.mem, _FB.backbuffer.mem, _FB_pagesize());
+    }
 }
