@@ -28,6 +28,9 @@ typedef struct fb {
     struct fb_fix_screeninfo fix_si;
     bitmap_t backbuffer;    // Used only when max_page = 1
 
+    struct fb_var_screeninfo saved_var_si;
+    struct fb_fix_screeninfo saved_fix_si;
+
     int nkeys;
     int key_queue[MAX_KEY_QUEUE];
 } fb_t;
@@ -125,6 +128,8 @@ int jcfb_start() {
 
     memcpy(&_FB.fix_si, &fix_si, sizeof(struct fb_fix_screeninfo));
     memcpy(&_FB.var_si, &var_si, sizeof(struct fb_var_screeninfo));
+    memcpy(&_FB.saved_fix_si, &fix_si, sizeof(struct fb_fix_screeninfo));
+    memcpy(&_FB.saved_var_si, &var_si, sizeof(struct fb_var_screeninfo));
 
     _FB.mem = mmap(NULL, _FB_memsize(),
                    PROT_READ | PROT_WRITE, MAP_SHARED, _FB.fd, 0);
@@ -163,6 +168,8 @@ void jcfb_stop() {
         _FB.mem = NULL;
     }
     if (_FB.fd >= 0) {
+        ioctl(_FB.fd, FBIOGET_FSCREENINFO, &_FB.saved_fix_si);
+        ioctl(_FB.fd, FBIOGET_VSCREENINFO, &_FB.saved_var_si);
         close(_FB.fd);
         _FB.fd = -1;
     }
