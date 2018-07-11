@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <fcntl.h>
+#include <ncurses.h>
 #include <stdbool.h>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -13,6 +15,9 @@
 #include "jcfb/bitmap.h"
 
 
+#define MAX_KEY_QUEUE   128
+
+
 typedef struct fb {
     int fd;
     void* mem;
@@ -22,6 +27,9 @@ typedef struct fb {
     struct fb_var_screeninfo var_si;
     struct fb_fix_screeninfo fix_si;
     bitmap_t backbuffer;    // Used only when max_page = 1
+
+    int nkeys;
+    int key_queue[MAX_KEY_QUEUE];
 } fb_t;
 
 
@@ -53,6 +61,19 @@ static void _FB_set_page(int page) {
 
 static bool _FB_has_double_buffering() {
     return _FB.page_max > 1;
+}
+
+
+static int _init_keyboard() {
+    _FB.nkeys = 0;
+    initscr();
+    cbreak();
+    noecho();
+    intrflush(stdscr, FALSE);
+    keypad(stdscr, TRUE);
+    nodelay(stdscr, TRUE);
+    curs_set(0);
+    return 0;
 }
 
 
@@ -102,24 +123,6 @@ int jcfb_start() {
     assert((var_si.bits_per_pixel >= 8) && "BPP >= 8 is mandatory");
     pixfmt_set_fb(&fmt);
 
-#ifdef DEBUG
-    printf(
-        "_FB.bmp = {\n"
-        "   .w = %d,\n"
-        "   .h = %d,\n"
-        "   .fmt = {\n"
-        "       .bpp = %zu,\n"
-        "       .offs = {%u, %u, %u, %u},\n"
-        "       .lengths = {%u, %u, %u, %u}\n"
-        "   }\n"
-        "}\n",
-        w, h,
-        fmt.bpp,
-        fmt.offs[0], fmt.offs[1], fmt.offs[2], fmt.offs[3],
-        fmt.sizes[0], fmt.sizes[1], fmt.sizes[2], fmt.sizes[3]
-    );
-#endif
-
     memcpy(&_FB.fix_si, &fix_si, sizeof(struct fb_fix_screeninfo));
     memcpy(&_FB.var_si, &var_si, sizeof(struct fb_var_screeninfo));
 
@@ -139,15 +142,22 @@ int jcfb_start() {
         bitmap_init(&_FB.backbuffer, &fmt, w, h);
     }
 
+    if (_init_keyboard() < 0) {
+        fprintf(stderr, "Unable to initialize the keyboard\n");
+        goto error;
+    }
+
     return 0;
 
   error:
+    // XXX better wipe needed ?
     if (_FB.fd >= 0) close(_FB.fd);
     return -1;
 }
 
 
 void jcfb_stop() {
+    endwin();
     if (_FB.mem && _FB.mem != MAP_FAILED) {
         munmap(_FB.mem, _FB_memsize());
         _FB.mem = NULL;
@@ -177,10 +187,31 @@ bitmap_t* jcfb_get_bitmap() {
 }
 
 
+static void _update_keys() {
+    int key = 0;
+    while ((key = getch()) != ERR) {
+        if (_FB.nkeys < MAX_KEY_QUEUE) {
+            _FB.key_queue[_FB.nkeys++] = key;
+        } else {
+            fprintf(stdout, "JCFB key queue is full\n");
+        }
+    }
+}
+
+
 void jcfb_refresh() {
     if (_FB_has_double_buffering()) {
         _FB_set_page((_FB.page + 1) % 2);
     } else {
         memcpy(_FB.bmp.mem, _FB.backbuffer.mem, _FB_pagesize());
     }
+    _update_keys();
+}
+
+
+int jcfb_next_key() {
+    if (!_FB.nkeys) {
+        return -1;
+    }
+    return _FB.key_queue[--_FB.nkeys];
 }

@@ -42,4 +42,10 @@ bitmap_t* jcfb_get_bitmap();
 void jcfb_refresh();
 
 
+/*
+ * Get the next available key press. Returns -1 if none is present.
+ */
+int jcfb_next_key();
+
+
 #endif

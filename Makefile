@@ -16,7 +16,7 @@ DBENCH=benchmarks
 # C Compiler
 CC=gcc
 CFLAGS=-Wall -std=gnu99 -Werror -I$(DINC)
-LDFLAGS=
+LDFLAGS=-lncurses
 ifeq ($(DEBUG),1)
 	CFLAGS+=-DDEBUG -g
 endif
@@ -44,7 +44,7 @@ $(JCFB): $(DOBJ)/pixel.o \
 
 
 $(SAMPLE): $(JCFB) $(DSAMPLE)/sample.c
-	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS)
 	cp sample/tiger.bmp $(DBUILD)
 
 
