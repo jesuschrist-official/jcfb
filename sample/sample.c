@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    bitmap_t* buffer = jcfb_get_bitmap();
     int exit = 0;
     while (!exit) {
         int key = 0;
@@ -29,13 +30,15 @@ int main(int argc, char** argv) {
                 exit = 1;
             }
         }
-        bitmap_clear(jcfb_get_bitmap(), 0x00000000);
-        bitmap_blit(jcfb_get_bitmap(), &tiger, 160, 120);
-        jcfb_refresh();
+        bitmap_clear(buffer, 0x00000000);
+        bitmap_blit(buffer, &tiger, 160, 120);
+        jcfb_refresh(buffer);
         usleep(1000);
     }
 
     bitmap_wipe(&tiger);
+    bitmap_wipe(buffer);
+    free(buffer);
 
     jcfb_stop();
     printf("Gentle quit\n");

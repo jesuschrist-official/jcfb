@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "jcfb/bitmap-loading.h"
+#include "jcfb/bitmap-io.h"
 
 
 struct _header {
@@ -146,14 +146,16 @@ static int _load_dib_header(FILE* f, uint32_t size, bitmap_t* bmp) {
 
 
 static int _read_pixel_array(FILE* f, bitmap_t* bmp) {
-    size_t line_size = (bmp->w * bmp->fmt.bpp) / 8;
-    size_t padding = line_size % 4;   // XXX Only used when Height > 1 ?
-    for (size_t y = 0; y < bmp->h; y++) {
-        uint8_t* dst = bmp->mem8 + (bmp->h - 1) * line_size
-                     - y * line_size;
-        if (fread(dst, 1, line_size, f) != line_size) {
-            fprintf(stderr, "Read error on line %zu\n", y);
-            return -1;
+    size_t bpp = bmp->fmt.bpp / 8;
+    size_t padding = (bmp->w * bpp) % 4;   // XXX Only used when Height > 1 ?
+    for (int y = bmp->h - 1; y >= 0; y--) {
+        for (size_t x = 0; x < bmp->w; x++) {
+            pixel_t p = 0;
+            if (fread(&p, bpp, 1, f) != 1) {
+                fprintf(stderr, "Cannot read pixel array\n");
+                return -1;
+            }
+            bmp->mem[y * bmp->w + x] = p;
         }
         fseek(f, padding, SEEK_CUR);
     }
@@ -198,6 +200,48 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
     bitmap_wipe(bmp);
     return 1;
 }
+
+#if 0
+int bitmap_save(const bitmap_t* bmp, const char* path) {
+    FILE* f = fopen(path, "w+");
+    if (!f) {
+        fprintf(stderr, "Cannot open bitmap file '%s' for writing`\n",
+                path);
+        return 1;
+    }
+
+    size_t line_size = (bmp->w * bmp->bpp) / 8;
+    line_size += (line_size % 4); // Padding
+    size_t full_size = sizeof(struct _header) + sizeof(uint32_t)
+                     + sizeof(struct _info_header)
+                     + bmp->h * line_size;
+    struct _header header = {
+        .header_field = {'B', 'M'},
+        .size = full_size,
+        .reserved = {0},
+        .data_offset = 0,
+    };
+    struct _info_header info_header = {
+        .width = bmp->w,
+        .height = bmp->h,
+        .color_plane_count = 1,
+        .bpp = bmp->fmt.bpp,
+        .compression_method = 0,
+        .image_size = 0,
+        .horizontal_res = 96,
+        .vertical_res = 96,
+        .palette_size = 0,
+        .important_color_count = 0,
+    };
+
+    fclose(f);
+    return 0;
+
+  error:
+    fclose(f);
+    return 1;
+}
+#endif
 
 
 _Static_assert(

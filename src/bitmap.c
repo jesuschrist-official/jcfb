@@ -8,10 +8,10 @@ int bitmap_init(bitmap_t* bmp, const pixfmt_t* fmt, int w, int h) {
         .w = w,
         .h = h,
         .fmt = *fmt,
-        .mem8 = calloc((w * h * fmt->bpp) / 8, 1),
+        .mem = calloc(w * h, sizeof(pixel_t)),
         .flags = BITMAP_FLAG_MEM_OWNER,
     };
-    if (!bmp->mem8) {
+    if (!bmp->mem) {
         return -1;
     }
     return 0;
@@ -25,7 +25,7 @@ int bitmap_init_from_memory(bitmap_t* bmp, const pixfmt_t* fmt, int w, int h,
         .w = w,
         .h = h,
         .fmt = *fmt,
-        .mem8 = mem,
+        .mem = mem,
         .flags = 0,
     };
     return 0;
@@ -33,22 +33,20 @@ int bitmap_init_from_memory(bitmap_t* bmp, const pixfmt_t* fmt, int w, int h,
 
 
 void bitmap_wipe(bitmap_t* bmp) {
-    if ((bmp->flags & BITMAP_FLAG_MEM_OWNER) && bmp->mem8) {
-        free(bmp->mem8);
-        bmp->mem8 = NULL;
+    if ((bmp->flags & BITMAP_FLAG_MEM_OWNER) && bmp->mem) {
+        free(bmp->mem);
+        bmp->mem = NULL;
     }
 }
 
 
 size_t bitmap_memsize(const bitmap_t* bmp) {
-    return (bmp->fmt.bpp * bmp->w * bmp->h) / 8;
+    return bmp->w * bmp->h * sizeof(pixel_t);
 }
 
 
 void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color) {
-    uint8_t* dst = bmp->mem8 + ((y * bmp->w + x) * bmp->fmt.bpp) / 8;
-    pixel_t dst_color = pixel(&bmp->fmt, color);
-    memcpy(dst, &dst_color, bmp->fmt.bpp / 8);
+    bmp->mem[y * bmp->w + x] = pixel(&bmp->fmt, color);
 }
 
 
@@ -61,43 +59,24 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color) {
 }
 
 
-static size_t _get_pixel_size(const bitmap_t* bmp) {
-    return bmp->fmt.bpp / 8;
-}
-
-
-static size_t _get_line_size(const bitmap_t* bmp) {
-    return bmp->w * _get_pixel_size(bmp);
-}
-
-
-static const void* _get_pixel_addr(const bitmap_t* bmp, int x, int y) {
-    return bmp->mem + (y * _get_line_size(bmp) + x * _get_pixel_size(bmp));
-}
-
-
 static void _fast_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
     for (int sy = 0; sy < src->h; sy++) {
-        const void* src_addr = _get_pixel_addr(src, 0, sy);
-        void* dst_addr = (void*)_get_pixel_addr(dst, x, sy + y);
-        memcpy(dst_addr, src_addr, _get_line_size(src));
+        memcpy(dst->mem + (y + sy) * dst->w + x,
+               src->mem + sy * src->w + x,
+               src->w * sizeof(pixel_t));
     }
 }
 
 
 static void _slow_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
     for (int sy = 0; sy < src->h; sy++) {
+        pixel_t* dest_addr = dst->mem + (y + sy) * dst->w + x;
+        memcpy(dest_addr,
+               src->mem + sy * src->w,
+               src->w * sizeof(pixel_t));
         for (int sx = 0; sx < src->w; sx++) {
-            int dx = x + sx;
-            int dy = y + sy;
-            uint8_t* src_addr = src->mem8
-                              + (sy * src->w + sx) * (src->fmt.bpp / 8);
-            uint8_t* dst_addr = dst->mem8
-                              + (dy * dst->w + dx) * (dst->fmt.bpp / 8);
-            pixel_t src_color = 0;
-            memcpy(&src_color, src_addr, src->fmt.bpp / 8);
-            pixel_t dst_color = pixel_conv(&src->fmt, &dst->fmt, src_color);
-            memcpy(dst_addr, &dst_color, dst->fmt.bpp / 8);
+            *(dest_addr + sx) = pixel_conv(&src->fmt, &dst->fmt,
+                                           *(dest_addr + sx));
         }
     }
 }

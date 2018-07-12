@@ -26,12 +26,7 @@ enum {
 typedef struct bitmap {
     size_t w, h;
     pixfmt_t fmt;
-    union {
-        void* mem;
-        uint8_t* mem8;
-        uint16_t* mem16;
-        uint32_t* mem32;
-    };
+    pixel_t* mem;
     uint32_t flags;
 } bitmap_t;
 

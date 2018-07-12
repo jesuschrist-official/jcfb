@@ -7,7 +7,7 @@
 
 #include "jcfb/pixel.h"
 #include "jcfb/bitmap.h"
-#include "jcfb/bitmap-loading.h"
+#include "jcfb/bitmap-io.h"
 
 
 /*
@@ -29,17 +29,19 @@ void jcfb_clear();
 
 
 /*
- * Get the framebuffer bitmap address.
- * This bitmap should be pointing on a backuffer, thus, you're drawing
- * procedure shouldn't be visible until `jcfb_refresh` is called.
+ * Get a bitmap of the dimension of the framebuffer, having its pixel
+ * format.
+ * Caller has the responsibility to free returned address and to wipe its
+ * content using `bitmap_wipe`.
  */
 bitmap_t* jcfb_get_bitmap();
 
 
 /*
- * Refresh the screen with the backbufferr.
+ * Refresh the screen with the given bitmap.
+ * Update keyboard status.
  */
-void jcfb_refresh();
+void jcfb_refresh(bitmap_t* bmp);
 
 
 /*

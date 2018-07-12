@@ -39,7 +39,7 @@ $(DOBJ)/%.o: $(DSRC)/%.c
 $(JCFB): $(DOBJ)/pixel.o \
          $(DOBJ)/jcfb.o \
          $(DOBJ)/bitmap.o \
-         $(DOBJ)/bitmap-loading.o
+         $(DOBJ)/bitmap-io.o
 	$(AR) rvs $@ $^
 
 
@@ -56,15 +56,12 @@ $(DBUILD)/pixel.test: $(DSRC)/pixel.c
 
 
 benchmarks: $(DBUILD)/pixel-conversion.bench \
-            $(DBUILD)/bitmap-blit.bench
+            $(DBUILD)/bitmap-blit.bench \
+            $(DBUILD)/jcfb-refresh.bench
 
 
-$(DBUILD)/pixel-conversion.bench: $(DBENCH)/pixel-conversion.c
-	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb
-
-
-$(DBUILD)/bitmap-blit.bench: $(DBENCH)/bitmap-blit.c
-	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb
+$(DBUILD)/%.bench: $(DBENCH)/%.c
+	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb -lncurses
 
 
 $(DBUILD):
