@@ -27,9 +27,10 @@ endif
 # Targets
 JCFB=$(DBUILD)/libjcfb.a
 SAMPLE=$(DBUILD)/sample.exe
+MANDELBROT=$(DBUILD)/mandelbrot.exe
 
 # Rules
-all: $(DBUILD) $(JCFB) $(SAMPLE) tests benchmarks
+all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) tests benchmarks
 
 
 $(DOBJ)/%.o: $(DSRC)/%.c
@@ -46,6 +47,10 @@ $(JCFB): $(DOBJ)/pixel.o \
 $(SAMPLE): $(JCFB) $(DSAMPLE)/sample.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS)
 	cp sample/tiger.bmp $(DBUILD)
+
+
+$(MANDELBROT): $(JCFB) $(DSAMPLE)/mandelbrot.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 
 tests: $(DBUILD)/pixel.test

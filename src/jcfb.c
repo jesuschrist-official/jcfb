@@ -194,3 +194,13 @@ int jcfb_next_key() {
     }
     return _FB.key_queue[--_FB.nkeys];
 }
+
+
+int jcfb_width() {
+    return _FB.var_si.xres;
+}
+
+
+int jcfb_height() {
+    return _FB.var_si.yres;
+}

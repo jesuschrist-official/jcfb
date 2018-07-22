@@ -50,4 +50,16 @@ void jcfb_refresh(bitmap_t* bmp);
 int jcfb_next_key();
 
 
+/*
+ * Get the framebuffer width.
+ */
+int jcfb_width();
+
+
+/*
+ * Get the framebuffer height.
+ */
+int jcfb_height();
+
+
 #endif
