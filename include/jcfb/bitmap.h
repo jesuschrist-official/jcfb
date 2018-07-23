@@ -76,4 +76,16 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color);
 void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
 
 
+/*
+ * Returns the bitmap line size.
+ */
+size_t bitmap_line_size(const bitmap_t* bmp);
+
+
+/*
+ * Returns the address of the given pixel.
+ */
+pixel_t* bitmap_pixel_addr(bitmap_t* bmp, int x, int y);
+
+
 #endif

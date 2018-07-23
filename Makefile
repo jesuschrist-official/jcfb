@@ -40,7 +40,8 @@ $(DOBJ)/%.o: $(DSRC)/%.c
 $(JCFB): $(DOBJ)/pixel.o \
          $(DOBJ)/jcfb.o \
          $(DOBJ)/bitmap.o \
-         $(DOBJ)/bitmap-io.o
+         $(DOBJ)/bitmap-io.o \
+         $(DOBJ)/primitive.o
 	$(AR) rvs $@ $^
 
 
@@ -80,7 +81,7 @@ install: $(JCFB)
 
 
 uninstall:
-	rm $(INSTALLATION_PATH)/lib/$(JCFB)
+	rm $(INSTALLATION_PATH)/lib/libjcfb.a
 	rm -rf $(INSTALLATION_PATH)/include/jcfb
 
 
