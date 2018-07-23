@@ -46,7 +46,7 @@ size_t bitmap_memsize(const bitmap_t* bmp) {
 
 
 void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color) {
-    bmp->mem[y * bmp->w + x] = pixel(&bmp->fmt, color);
+    bmp->mem[y * bmp->w + x] = pixel_to(&bmp->fmt, color);
 }
 
 

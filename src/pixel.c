@@ -59,7 +59,16 @@ static uint32_t _comp_conv_32(uint32_t off, uint32_t size, uint32_t comp) {
 }
 
 
-pixel_t pixel(const pixfmt_t* fmt, pixel_t rgba32) {
+pixel_t pixel(pixel_t rgba32) {
+    static const pixfmt_t* fmt = &_PIXFMTS[PIXFMT_FB];
+    return _comp_conv_32(fmt->offs[0], fmt->sizes[0], ((rgba32 >> 0 ) & 0xff))
+         | _comp_conv_32(fmt->offs[1], fmt->sizes[1], ((rgba32 >> 8 ) & 0xff))
+         | _comp_conv_32(fmt->offs[2], fmt->sizes[2], ((rgba32 >> 16) & 0xff))
+         | _comp_conv_32(fmt->offs[3], fmt->sizes[3], ((rgba32 >> 24) & 0xff));
+}
+
+
+pixel_t pixel_to(const pixfmt_t* fmt, pixel_t rgba32) {
     return _comp_conv_32(fmt->offs[0], fmt->sizes[0], ((rgba32 >> 0 ) & 0xff))
          | _comp_conv_32(fmt->offs[1], fmt->sizes[1], ((rgba32 >> 8 ) & 0xff))
          | _comp_conv_32(fmt->offs[2], fmt->sizes[2], ((rgba32 >> 16) & 0xff))
@@ -110,11 +119,13 @@ int main(void) {
     assert(_comp_conv(8, 4, 16, 8, 0xabcd0fab) == 0xf00000);
 
     pixfmt_t rgb16 = (pixfmt_t){
+        .id = 1,
         .bpp = 16,
         .offs = {11, 5, 0, 0},
         .sizes = {5, 6, 5, 0}
     };
     pixfmt_t rgb24 = (pixfmt_t){
+        .id = 2,
         .bpp = 24,
         .offs = {0, 8, 16, 0},
         .sizes = {8, 8, 8, 0}
@@ -124,7 +135,7 @@ int main(void) {
 
     // TEST pixel
     src = 0x04c08040;
-    dst = pixel(&rgb16, src);
+    dst = pixel_to(&rgb16, src);
     // Red is rshifted by three (0x40 >> 3 == 0x08) and positioned at offset
     // 11. The maximal value of red is 2^6 - 1 == 0x1f.
     assert(((dst >> 11) & 0x1f) == 0x08);

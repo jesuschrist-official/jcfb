@@ -73,9 +73,15 @@ typedef uint32_t pixel_t;
 
 
 /*
- * Convert a RGBA32 pixel value with the given pixel format.
+ * Convert a RGBA32 pixel value to the framebuffer format.
  */
-pixel_t pixel(const pixfmt_t* fmt, pixel_t rgba32);
+pixel_t pixel(pixel_t rgba32);
+
+
+/*
+ * Convert a RGBA32 pixel value to the given format.
+ */
+pixel_t pixel_to(const pixfmt_t* fmt, pixel_t rgba32);
 
 
 /*

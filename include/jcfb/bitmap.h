@@ -14,7 +14,7 @@
  */
 enum {
     /*
-     * The bitmap doesn't own its memory
+     * The bitmap owns its memory
      */
     BITMAP_FLAG_MEM_OWNER = 0x01,
 };
