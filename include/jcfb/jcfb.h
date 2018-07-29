@@ -4,10 +4,12 @@
 #ifndef _jcfb_h_
 #define _jcfb_h_
 
+#include <ncurses.h> // For KEY_* symbols export
 
 #include "jcfb/pixel.h"
 #include "jcfb/bitmap.h"
 #include "jcfb/bitmap-io.h"
+#include "jcfb/primitive.h"
 
 
 /*

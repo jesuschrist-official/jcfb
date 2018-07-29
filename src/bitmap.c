@@ -136,3 +136,7 @@ void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
         _blit_scaled_row(dst_addr, src_addr, src->w, dw);
     }
 }
+
+pixel_t* bitmap_pixel_addr(bitmap_t* bmp, int x, int y) {
+    return &bmp->mem[y * bmp->w + x];
+}
