@@ -87,6 +87,14 @@ void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
 
 
 /*
+ * Blit the `src` bitmap at the given position of `dest` bitmap, scaled to
+ * dimensions (dw, dh).
+ */
+void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
+                        int x, int y, int dw, int dh);
+
+
+/*
  * Returns the size needed to store a bitmap line, in bytes.
  */
 size_t bitmap_line_size(const bitmap_t* bmp);

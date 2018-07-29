@@ -130,7 +130,7 @@ int jcfb_start() {
 
     _FB.var_si.xoffset = 0;
     _FB.var_si.yoffset = 0;
-    ioctl(_FB.fd, FBIOPAN_DISPLAY, &_FB.var_si);
+    ioctl(_FB.fd, FBIOPUT_VSCREENINFO, &_FB.var_si);
 
     if (_init_keyboard() < 0) {
         fprintf(stderr, "Unable to initialize the keyboard\n");
@@ -153,7 +153,7 @@ void jcfb_stop() {
         _FB.mem = NULL;
     }
     if (_FB.fd >= 0) {
-        ioctl(_FB.fd, FBIOPAN_DISPLAY, &_FB.saved_var_si);
+        ioctl(_FB.fd, FBIOPUT_VSCREENINFO, &_FB.saved_var_si);
         close(_FB.fd);
         _FB.fd = -1;
     }

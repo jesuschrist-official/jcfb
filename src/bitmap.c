@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "jcfb/bitmap.h"
+#include "jcfb/util.h"
 
 
 int bitmap_init(bitmap_t* bmp, int w, int h) {
@@ -102,5 +103,36 @@ void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
         _fast_blit(dst, src, x, y);
     } else {
         _slow_blit(dst, src, x, y);
+    }
+}
+
+
+static void _blit_scaled_row(pixel_t* dst, const pixel_t* src,
+                             int sw, int dw)
+{
+    // If scale is greater than 1, it means that the source is greater than
+    // the dest, so we will miss some input pixels.
+    // If scale is lower than 1, it means the the source is smaller than
+    // the dest, so we will duplicates some pixels.
+    float scale = sw / (float) dw;
+    for (int dx = 0; dx < dw; dx++) {
+        int sx = dx * scale;
+        // TODO conversion ?
+        dst[dx] = src[sx];
+    }
+}
+
+
+void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
+                        int dx, int dy, int dw, int dh)
+{
+    int min_y = dy;
+    int max_y = dy + dh;
+    float y_ratio = src->h / (float)dh;
+    for (; dy < max_y; dy++) {
+        int sy = min((dy - min_y) * y_ratio, src->h - 1);
+        pixel_t* dst_addr = dst->mem + dy * dst->w + dx;
+        pixel_t* src_addr = src->mem + sy * src->w;
+        _blit_scaled_row(dst_addr, src_addr, src->w, dw);
     }
 }
