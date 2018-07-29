@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     }
 
     bitmap_t tiger;
-    if (bitmap_load(&tiger, "tiger.bmp") < 0) {
+    if (bitmap_load(&tiger, "tiger.bmp") != 0) {
         return 1;
     }
 

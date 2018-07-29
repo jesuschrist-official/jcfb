@@ -30,7 +30,8 @@ typedef enum {
     PIXFMT_RGB16,
     PIXFMT_RGB24,
     PIXFMT_RGBA32,
-    PIXFMT_ARGB32
+    PIXFMT_ARGB32,
+    PIXFMT_ABGR32
 } pixfmt_id_t;
 
 

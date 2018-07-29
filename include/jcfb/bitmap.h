@@ -3,7 +3,8 @@
  *
  * Load, create and manipulate bitmaps.
  * Many bitmaps functions assume JCFB has been started and framebuffer pixel
- * format has been set.
+ * format has been set. Calling thus functions in such context is an undefined
+ * behaviour.
  */
 #ifndef _jcfb_bitmap_h_
 #define _jcfb_bitmap_h_

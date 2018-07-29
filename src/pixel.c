@@ -29,6 +29,11 @@ static pixfmt_t _PIXFMTS[] = {
         .offs = {16, 8, 0, 24},
         .sizes = {8, 8, 8, 8},
      },
+     [PIXFMT_ABGR32] = {
+        .bpp = 32,
+        .offs = {0, 8, 16, 24},
+        .sizes = {8, 8, 8, 8},
+     },
 };
 
 
