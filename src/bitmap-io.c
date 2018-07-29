@@ -43,18 +43,18 @@ struct _info_header {
     }
 
 
-static int _bpp_to_pixfmt(uint16_t bpp, pixfmt_t* fmt) {
+static int _bpp_to_pixfmt(uint16_t bpp, pixfmt_id_t* fmt) {
     switch (bpp) {
       case 16:
-        *fmt = pixfmt_get(PIXFMT_RGB16);
+        *fmt = PIXFMT_RGB16;
         break;
 
       case 24:
-        *fmt = pixfmt_get(PIXFMT_RGB24);
+        *fmt = PIXFMT_RGB24;
         break;
 
       case 32:
-        *fmt = pixfmt_get(PIXFMT_RGBA32);
+        *fmt = PIXFMT_RGBA32;
         break;
 
       default:
@@ -65,9 +65,8 @@ static int _bpp_to_pixfmt(uint16_t bpp, pixfmt_t* fmt) {
 }
 
 
-static int _load_core_header(FILE* f, bitmap_t* bmp) {
+static int _load_core_header(FILE* f, bitmap_t* bmp, pixfmt_id_t* fmt_id) {
     struct _core_header header;
-    pixfmt_t fmt;
 
     READ(header);
 #ifdef DEBUG
@@ -79,10 +78,10 @@ static int _load_core_header(FILE* f, bitmap_t* bmp) {
            header.bpp, header.width, header.height
     );
 #endif
-    if (_bpp_to_pixfmt(header.bpp, &fmt) < 0) {
+    if (_bpp_to_pixfmt(header.bpp, fmt_id) < 0) {
         goto error;
     }
-    if (bitmap_init(bmp, &fmt, header.width, header.height) < 0) {
+    if (bitmap_init(bmp, header.width, header.height) < 0) {
         goto error;
     }
 
@@ -93,9 +92,8 @@ static int _load_core_header(FILE* f, bitmap_t* bmp) {
 }
 
 
-static int _load_info_header(FILE* f, bitmap_t* bmp) {
+static int _load_info_header(FILE* f, bitmap_t* bmp, pixfmt_id_t* fmt_id) {
     struct _info_header header;
-    pixfmt_t fmt;
 
     READ(header);
 #ifdef DEBUG
@@ -113,10 +111,10 @@ static int _load_info_header(FILE* f, bitmap_t* bmp) {
                 "JCFB doesn't support bitmaps with compression method\n");
         goto error;
     }
-    if (_bpp_to_pixfmt(header.bpp, &fmt) < 0) {
+    if (_bpp_to_pixfmt(header.bpp, fmt_id) < 0) {
         goto error;
     }
-    if (bitmap_init(bmp, &fmt, header.width, header.height) < 0) {
+    if (bitmap_init(bmp, header.width, header.height) < 0) {
         goto error;
     }
 
@@ -127,13 +125,15 @@ static int _load_info_header(FILE* f, bitmap_t* bmp) {
 }
 
 
-static int _load_dib_header(FILE* f, uint32_t size, bitmap_t* bmp) {
+static int _load_dib_header(FILE* f, uint32_t size, bitmap_t* bmp,
+                            pixfmt_id_t* src_fmt)
+{
     switch (size) {
       case 12:
-        return _load_core_header(f, bmp);
+        return _load_core_header(f, bmp, src_fmt);
 
       case 40:
-        return _load_info_header(f, bmp);
+        return _load_info_header(f, bmp, src_fmt);
       
       default:
         fprintf(stderr,
@@ -145,8 +145,9 @@ static int _load_dib_header(FILE* f, uint32_t size, bitmap_t* bmp) {
 }
 
 
-static int _read_pixel_array(FILE* f, bitmap_t* bmp) {
-    size_t bpp = bmp->fmt.bpp / 8;
+static int _read_pixel_array(FILE* f, pixfmt_id_t fmt_id, bitmap_t* bmp) {
+    pixfmt_t fmt = pixfmt_get(fmt_id);
+    size_t bpp = fmt.bpp / 8;
     size_t padding = (bmp->w * bpp) % 4;   // XXX Only used when Height > 1 ?
     for (int y = bmp->h - 1; y >= 0; y--) {
         for (size_t x = 0; x < bmp->w; x++) {
@@ -155,7 +156,7 @@ static int _read_pixel_array(FILE* f, bitmap_t* bmp) {
                 fprintf(stderr, "Cannot read pixel array\n");
                 return -1;
             }
-            bmp->mem[y * bmp->w + x] = p;
+            bmp->mem[y * bmp->w + x] = pixel_conv(fmt_id, bmp->fmt, p);
         }
         fseek(f, padding, SEEK_CUR);
     }
@@ -179,15 +180,16 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
                 path);
         goto error;
     }
+    pixfmt_id_t src_fmt_id;
     uint32_t dib_header_size;
     READ(dib_header_size);
-    if (_load_dib_header(f, dib_header_size, bmp) < 0) {
+    if (_load_dib_header(f, dib_header_size, bmp, &src_fmt_id) < 0) {
         fprintf(stderr, "Error reading DIB header of '%s'\n", path);
         goto error;
     }
 
     fseek(f, header.data_offset, SEEK_SET);
-    if (_read_pixel_array(f, bmp) < 0) {
+    if (_read_pixel_array(f, src_fmt_id, bmp) < 0) {
         fprintf(stderr, "Error reading pixel array of '%s'\n", path);
         goto error;
     }

@@ -50,7 +50,7 @@ static void _draw_frame(bitmap_t* bmp) {
     size_t bpp = _FB.var_si.bits_per_pixel / 8;
     pixel_t* src = bmp->mem;
     for (size_t i  = 0; i < bmp->w * bmp->h; i++) {
-        pixel_t res = pixel_conv(&_FB.fmt, &bmp->fmt, *src);
+        pixel_t res = pixel_conv(PIXFMT_FB, bmp->fmt, *src);
         memcpy(dest, &res, bpp);
         dest += bpp;
         src++;
@@ -97,7 +97,6 @@ int jcfb_start() {
     }
 
     pixfmt_t fmt = (pixfmt_t){
-        .id = PIXFMT_FB,
         .bpp = var_si.bits_per_pixel,
         .offs = {
             [COMP_RED] = var_si.red.offset,
@@ -168,7 +167,7 @@ void jcfb_clear() {
 
 bitmap_t* jcfb_get_bitmap() {
     bitmap_t* bmp = malloc(sizeof(bitmap_t));
-    bitmap_init(bmp, &_FB.fmt, _FB.var_si.xres, _FB.var_si.yres);
+    bitmap_init(bmp, _FB.var_si.xres, _FB.var_si.yres);
     return bmp;
 }
 

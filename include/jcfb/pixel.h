@@ -42,7 +42,6 @@ typedef enum {
  * This structure can be used to compute pixel conversions.
  */
 typedef struct pixfmt {
-    pixfmt_id_t id;           /* Format ID */
     size_t bpp;               /* Bits per pixel */
     uint32_t offs[COMP_MAX];  /* Components offset */
     uint32_t sizes[COMP_MAX]; /* Components length */
@@ -59,6 +58,7 @@ pixfmt_t pixfmt_get(pixfmt_id_t which);
 
 /*
  * Set the pixfmt used by the framebuffer
+ * XXX Should put this function in a private context ?
  */
 void pixfmt_set_fb(const pixfmt_t* fmt);
 
@@ -66,7 +66,7 @@ void pixfmt_set_fb(const pixfmt_t* fmt);
 /*
  * Pixel
  *
- * Simple scalar type to represents a pixel. Pixel value depends of its
+ * Simple scalar type to represent a pixel. Pixel value depends of its
  * format.
  */
 typedef uint32_t pixel_t;
@@ -81,13 +81,13 @@ pixel_t pixel(pixel_t rgba32);
 /*
  * Convert a RGBA32 pixel value to the given format.
  */
-pixel_t pixel_to(const pixfmt_t* fmt, pixel_t rgba32);
+pixel_t pixel_to(pixfmt_id_t fmt, pixel_t rgba32);
 
 
 /*
  * Convert a pixel from any format to a pixel of any format.
  */
-pixel_t pixel_conv(const pixfmt_t* in_fmt, const pixfmt_t* out_fmt, pixel_t p);
+pixel_t pixel_conv(pixfmt_id_t in_fmt, pixfmt_id_t out_fmt, pixel_t p);
 
 
 #endif

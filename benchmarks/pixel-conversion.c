@@ -6,15 +6,15 @@
 #define NITERATIONS 10000000
 
 int main(void) {
-    pixfmt_t rgb16 = pixfmt_get(PIXFMT_RGB16);
-    pixfmt_t rgb24 = pixfmt_get(PIXFMT_RGB24);
+    pixfmt_id_t rgb16 = PIXFMT_RGB16;
+    pixfmt_id_t rgb24 = PIXFMT_RGB24;
     pixel_t p = 0x00f0f0f0;
 
     struct timeval start, stop;
 
     gettimeofday(&start, NULL);
     for (volatile size_t i = 0; i < NITERATIONS; i++) {
-        pixel_conv(&rgb24, &rgb16, p);
+        pixel_conv(rgb24, rgb16, p);
     }
     gettimeofday(&stop, NULL);
     float elapsed = (stop.tv_sec + stop.tv_usec * 1E-6)

@@ -6,12 +6,10 @@
 #define NITERATIONS 100
 
 int main(void) {
-    pixfmt_t rgb16 = pixfmt_get(PIXFMT_RGB16);
-    pixfmt_t rgb24 = pixfmt_get(PIXFMT_RGB24);
     bitmap_t bmp16, bmp24;
 
-    bitmap_init(&bmp16, &rgb16, 640, 480);
-    bitmap_init(&bmp24, &rgb24, 640, 480);
+    bitmap_init_ex(&bmp16, PIXFMT_RGB16, 640, 480);
+    bitmap_init_ex(&bmp24, PIXFMT_RGB24, 640, 480);
 
     struct timeval start, stop;
 

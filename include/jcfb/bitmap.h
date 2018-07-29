@@ -2,6 +2,8 @@
  * Bitmap module
  *
  * Load, create and manipulate bitmaps.
+ * Many bitmaps functions assume JCFB has been started and framebuffer pixel
+ * format has been set.
  */
 #ifndef _jcfb_bitmap_h_
 #define _jcfb_bitmap_h_
@@ -25,24 +27,30 @@ enum {
  */
 typedef struct bitmap {
     size_t w, h;
-    pixfmt_t fmt;
+    pixfmt_id_t fmt;
     pixel_t* mem;
     uint32_t flags;
 } bitmap_t;
 
 
 /*
- * Initialize a bitmap having the given dimensions and pixel format.
+ * Initialize a bitmap having the given dimensions and the PIXFMT_FB pixel
+ * format.
  */
-int bitmap_init(bitmap_t* bmp, const pixfmt_t* fmt, int w, int h);
+int bitmap_init(bitmap_t* bmp, int w, int h);
 
 
 /*
- * Initialize a bitmap having the given dimensions and pixel format pointing
- * to a foreign memory area.
+ * Like `bitmap_init` but the bitmap doesn't own its own memory.
  */
-int bitmap_init_from_memory(bitmap_t* bmp, const pixfmt_t* fmt, int w, int h,
-                            void* mem);
+int bitmap_init_from_memory(bitmap_t* bmp, int w, int h, void* mem);
+
+
+/*
+ * Initialize a bitmap having the given dimensions and the given pixel
+ * format.
+ */
+int bitmap_init_ex(bitmap_t* bmp, pixfmt_id_t fmt, int w, int h);
 
 
 /*
@@ -59,7 +67,8 @@ size_t bitmap_memsize(const bitmap_t* bmp);
 
 /*
  * Put a RGBA32 pixel at the given coordinates of the bitmap.
- * Notates that this function is slow due to its genericity.
+ * This function need to convert the given pixel every time it is
+ * called, that will be slow.
  */
 void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color);
 
@@ -77,7 +86,7 @@ void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
 
 
 /*
- * Returns the bitmap line size.
+ * Returns the size needed to store a bitmap line, in bytes.
  */
 size_t bitmap_line_size(const bitmap_t* bmp);
 
