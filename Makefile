@@ -28,9 +28,10 @@ endif
 JCFB=$(DBUILD)/libjcfb.a
 SAMPLE=$(DBUILD)/sample.exe
 MANDELBROT=$(DBUILD)/mandelbrot.exe
+TETRIS=$(DBUILD)/tetris.exe
 
 # Rules
-all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) tests benchmarks
+all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) tests benchmarks
 
 
 $(DOBJ)/%.o: $(DSRC)/%.c
@@ -51,6 +52,10 @@ $(SAMPLE): $(JCFB) $(DSAMPLE)/sample.c
 
 
 $(MANDELBROT): $(JCFB) $(DSAMPLE)/mandelbrot.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
+
+
+$(TETRIS): $(JCFB) $(DSAMPLE)/tetris.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 
