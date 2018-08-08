@@ -76,21 +76,21 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color) {
 
 
 static void _fast_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
-    for (int sy = 0; sy < src->h; sy++) {
+    for (int sy = 0; sy < min(src->h, dst->h - y); sy++) {
         memcpy(dst->mem + (y + sy) * dst->w + x,
                src->mem + sy * src->w,
-               src->w * sizeof(pixel_t));
+               min(src->w, dst->w - x) * sizeof(pixel_t));
     }
 }
 
 
 static void _slow_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
-    for (int sy = 0; sy < src->h; sy++) {
+    for (int sy = 0; sy < min(src->h, dst->h - y); sy++) {
         pixel_t* dest_addr = dst->mem + (y + sy) * dst->w + x;
         memcpy(dest_addr,
                src->mem + sy * src->w,
-               src->w * sizeof(pixel_t));
-        for (int sx = 0; sx < src->w; sx++) {
+               min(src->w, dst->w - x) * sizeof(pixel_t));
+        for (int sx = 0; sx < min(src->w, dst->w - x); sx++) {
             *(dest_addr + sx) = pixel_conv(src->fmt, dst->fmt,
                                            *(dest_addr + sx));
         }
@@ -129,20 +129,20 @@ void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
     int min_y = dy;
     int max_y = dy + dh;
     float y_ratio = src->h / (float)dh;
-    for (; dy < max_y; dy++) {
+    for (; dy < min(max_y, dst->h); dy++) {
         int sy = min((dy - min_y) * y_ratio, src->h - 1);
         pixel_t* dst_addr = dst->mem + dy * dst->w + dx;
         pixel_t* src_addr = src->mem + sy * src->w;
-        _blit_scaled_row(dst_addr, src_addr, src->w, dw);
+        _blit_scaled_row(dst_addr, src_addr, src->w, min(dw, dst->w - dx));
     }
 }
 
 
 void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
     pixel_t mask = pixel_to(src->fmt, 0x00ff00ff);
-    for (size_t sy = 0; sy < src->h; sy++) {
+    for (size_t sy = 0; sy < min(src->h, dst->h - y); sy++) {
         size_t dy = (y + sy) * dst->w;
-        for (size_t sx = 0; sx < src->w; sx++) {
+        for (size_t sx = 0; sx < min(src->w, dst->w - x); sx++) {
             pixel_t p = src->mem[sy * src->w + sx];
             if (p == mask) {
                 continue;

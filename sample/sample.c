@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
     int dy = (buffer->h - dh) / 2;
     bitmap_scaled_blit(buffer, &image, dx, dy, dw, dh);
 
-    bitmap_masked_blit(buffer, &player, 320, 240);
+    bitmap_masked_blit(buffer, &player, 600, 430);
 
     int exit = 0;
     while (!exit) {
