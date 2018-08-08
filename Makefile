@@ -88,6 +88,7 @@ $(DBUILD)/%.bench: $(DBENCH)/%.c
 $(DBUILD):
 	mkdir -p $(DBUILD)
 	mkdir -p $(DOBJ)
+	cp -r data/ $(DBUILD)
 
 
 install: $(JCFB)

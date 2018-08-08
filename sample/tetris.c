@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "jcfb/jcfb.h"
 
+#define MAX(_x, _y) (((_x) > (_y)) ? (_x) : (_y))
 
 // Tetrimino ------------------------------------------------------------------
 typedef enum {
@@ -144,6 +146,8 @@ void clock_rotate_tetrimino(const tetrimino_t* t, tetrimino_t* r) {
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 22
 
+#define MAX_LEVELS 22
+
 
 typedef struct game {
     tetrimino_t tetrimino;  // Currently played tetrimino
@@ -152,6 +156,10 @@ typedef struct game {
     int lost;
     int loop_count;
     int loop_time;
+
+    int level;
+    int score;
+    int lines_counter;
 } game_t;
 
 
@@ -220,6 +228,7 @@ void lock_tetrimino() {
     }
 
     // Check if we need to delete some rows
+    int deleted = 0;
     for (int y = _G.y; y < _G.y + _G.tetrimino.h; y++) {
         int count = 0;
         for (int x = 0; x < BOARD_WIDTH; x++) {
@@ -229,8 +238,19 @@ void lock_tetrimino() {
         }
         if (count == BOARD_WIDTH) {
             delete_row(y);
+            deleted++;
         }
     }
+
+    // Increasing score
+    static int lines_to_score[] = {0, 40, 100, 300, 1200};
+    _G.score += lines_to_score[deleted] * (_G.level + 1);
+
+    // Increasing level
+    if (_G.lines_counter + deleted >= 10) {
+        _G.level++;
+    }
+    _G.lines_counter = (_G.lines_counter + deleted) % 10;
 }
 
 
@@ -267,7 +287,9 @@ void start_game() {
     spawn_tetrimino();
     _G.lost = false;
     _G.loop_count = 0;
-    _G.loop_time = 20;
+    _G.level = 0;
+    _G.score = 0;
+    _G.lines_counter = 0;
 }
 
 
@@ -275,7 +297,8 @@ void start_game() {
  * Loop the game
  */
 void loop_game() {
-    _G.loop_count = (_G.loop_count + 1) % _G.loop_time;
+    int mod_op = MAX(1, MAX_LEVELS - _G.level);
+    _G.loop_count = (_G.loop_count + 1) % mod_op;
     if (_G.loop_count) {
         return;
     }
@@ -395,6 +418,8 @@ void draw_game(bitmap_t* bmp) {
 
 // ----------------------------------------------------------------------------
 int main(int argc, char** argv) {
+    srand(time(NULL));
+
     if (jcfb_start() < 0) {
         fprintf(stderr, "Cannot start JCFB\n");
         return 1;
@@ -403,14 +428,11 @@ int main(int argc, char** argv) {
     bitmap_t* buffer = jcfb_get_bitmap();
     bitmap_t board;
     bitmap_init(&board, buffer->h / 2, buffer->h - 1);
-    draw_vline(buffer, pixel(0x00ffffff), buffer->w / 2 - board.w / 2 - 1, 0,
-               buffer->h);
-    draw_vline(buffer, pixel(0x00ffffff), buffer->w / 2 + board.w / 2 + 1, 0,
-               buffer->h);
-    draw_hline(buffer, pixel(0x00ffffff),
-               buffer->w / 2 - board.w / 2,
-               buffer->w / 2 + board.w / 2,
-               buffer->h - 1);
+
+    ttf_font_t font;
+    if (ttf_load(&font, "data/Hermit-light.otf") < 0) {
+        goto error;
+    }
 
     start_game();
     int exit = 0;
@@ -434,8 +456,28 @@ int main(int argc, char** argv) {
             }
         }
         loop_game();
+
+        bitmap_clear(buffer, 0x00000000);
+        draw_vline(buffer, pixel(0x00ffffff), buffer->w / 2 - board.w / 2 - 1,
+                   0, buffer->h);
+        draw_vline(buffer, pixel(0x00ffffff), buffer->w / 2 + board.w / 2 + 1,
+                   0, buffer->h);
+        draw_hline(buffer, pixel(0x00ffffff),
+                   buffer->w / 2 - board.w / 2,
+                   buffer->w / 2 + board.w / 2 + 1,
+                   buffer->h - 1);
+
         draw_game(&board);
         bitmap_blit(buffer, &board, buffer->w / 2 - board.w / 2, 0);
+
+        char str_buffer[256];
+        sprintf(str_buffer, "Level %d", _G.level);
+        ttf_render(&font, str_buffer, buffer, buffer->w / 2 + board.w / 2 + 10,
+                   24, 24, 0x0055cc22);
+        sprintf(str_buffer, "Score %d", _G.score);
+        ttf_render(&font, str_buffer, buffer, buffer->w / 2 + board.w / 2 + 10,
+                   48, 24, 0x00cc5500);
+
         jcfb_refresh(buffer);
         usleep(1E6 / 30);
     }
@@ -443,7 +485,12 @@ int main(int argc, char** argv) {
     bitmap_wipe(&board);
     bitmap_wipe(buffer);
     free(buffer);
+    ttf_wipe(&font);
     jcfb_stop();
 
     return 0;
+
+  error:
+    jcfb_stop();
+    return 1;
 }

@@ -4353,6 +4353,7 @@ static int stbtt__solve_cubic(float a, float b, float c, float* r)
    }
 }
 
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 STBTT_DEF unsigned char * stbtt_GetGlyphSDF(const stbtt_fontinfo *info, float scale, int glyph, int padding, unsigned char onedge_value, float pixel_dist_scale, int *width, int *height, int *xoff, int *yoff)
 {
    float scale_x = scale, scale_y = scale;
