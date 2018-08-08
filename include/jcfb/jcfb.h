@@ -10,6 +10,7 @@
 #include "jcfb/bitmap.h"
 #include "jcfb/bitmap-io.h"
 #include "jcfb/primitive.h"
+#include "jcfb/ttf.h"
 
 
 /*

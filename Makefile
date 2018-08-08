@@ -1,5 +1,6 @@
 # jcfblib Makefile
 
+
 # User variables
 DEBUG=0
 INSTALLATION_PATH=/usr/local
@@ -24,14 +25,18 @@ ifeq ($(RELEASE),1)
 	CFLAGS+=-DRELEASE -O3
 endif
 
+
 # Targets
 JCFB=$(DBUILD)/libjcfb.a
 SAMPLE=$(DBUILD)/sample.exe
 MANDELBROT=$(DBUILD)/mandelbrot.exe
 TETRIS=$(DBUILD)/tetris.exe
+TTF=$(DBUILD)/ttf.exe
+
 
 # Rules
-all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) tests benchmarks
+all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) $(TTF) tests \
+     benchmarks
 
 
 $(DOBJ)/%.o: $(DSRC)/%.c
@@ -42,7 +47,8 @@ $(JCFB): $(DOBJ)/pixel.o \
          $(DOBJ)/jcfb.o \
          $(DOBJ)/bitmap.o \
          $(DOBJ)/bitmap-io.o \
-         $(DOBJ)/primitive.o
+         $(DOBJ)/primitive.o \
+         $(DOBJ)/ttf.o
 	$(AR) rvs $@ $^
 
 
@@ -56,6 +62,10 @@ $(MANDELBROT): $(JCFB) $(DSAMPLE)/mandelbrot.c
 
 
 $(TETRIS): $(JCFB) $(DSAMPLE)/tetris.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
+
+
+$(TTF): $(JCFB) $(DSAMPLE)/ttf.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 
