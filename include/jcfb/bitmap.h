@@ -95,6 +95,13 @@ void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
 
 
 /*
+ * Blit the `src` bitmap at the given position of `dest` bitmap. Skip masked
+ * pixels.
+ */
+void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
+
+
+/*
  * Returns the size needed to store a bitmap line, in bytes.
  */
 size_t bitmap_line_size(const bitmap_t* bmp);

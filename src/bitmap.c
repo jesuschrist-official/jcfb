@@ -137,6 +137,23 @@ void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
     }
 }
 
+
+void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
+    pixel_t mask = pixel_to(src->fmt, 0x00ff00ff);
+    for (size_t sy = 0; sy < src->h; sy++) {
+        size_t dy = (y + sy) * dst->w;
+        for (size_t sx = 0; sx < src->w; sx++) {
+            pixel_t p = src->mem[sy * src->w + sx];
+            if (p == mask) {
+                continue;
+            }
+            size_t dx = x + sx;
+            dst->mem[dy + dx] = pixel_conv(src->fmt, dst->fmt, p);
+        }
+    }
+}
+
+
 pixel_t* bitmap_pixel_addr(bitmap_t* bmp, int x, int y) {
     return &bmp->mem[y * bmp->w + x];
 }

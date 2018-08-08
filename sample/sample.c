@@ -25,6 +25,11 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    bitmap_t player;
+    if (bitmap_load(&player, "data/player.bmp") != 0) {
+        return 1;
+    }
+
     bitmap_t* buffer = jcfb_get_bitmap();
     bitmap_clear(buffer, 0x00000000);
 
@@ -44,6 +49,8 @@ int main(int argc, char** argv) {
     int dy = (buffer->h - dh) / 2;
     bitmap_scaled_blit(buffer, &image, dx, dy, dw, dh);
 
+    bitmap_masked_blit(buffer, &player, 320, 240);
+
     int exit = 0;
     while (!exit) {
         int key = 0;
@@ -58,6 +65,7 @@ int main(int argc, char** argv) {
     }
 
     bitmap_wipe(&image);
+    bitmap_wipe(&player);
     bitmap_wipe(buffer);
     free(buffer);
 

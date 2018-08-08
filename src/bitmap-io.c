@@ -23,6 +23,10 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
     for (size_t y = 0; y < h; y++) {
         for (size_t x = 0; x < w; x++) {
             *dst = pixel_conv(PIXFMT_ABGR32, bmp->fmt, *src);
+            // Handling alpha
+            if ((*src & 0x000000ff) == 0x000000ff) {
+                *dst = pixel_to(bmp->fmt, 0x00ff00ff);
+            }
             dst++;
             src++;
         }
