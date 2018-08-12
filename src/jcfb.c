@@ -1,14 +1,17 @@
 #include <assert.h>
+#include <ctype.h>
 #include <fcntl.h>
-#include <ncurses.h>
 #include <stdbool.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <linux/fb.h>
+#include <linux/kd.h>
+#include <linux/keyboard.h>
 
 #include "jcfb/jcfb.h"
 #include "jcfb/pixel.h"
@@ -30,12 +33,21 @@ typedef struct fb {
     struct fb_var_screeninfo saved_var_si;
     struct fb_fix_screeninfo saved_fix_si;
 
+    int keyb_fd;
+    struct termios saved_ts;
+    int saved_kmode;
     int nkeys;
     int key_queue[MAX_KEY_QUEUE];
+
+    keyc_t keys[KEYC_MAX];
 } fb_t;
 
 
 static fb_t _FB;
+
+
+static void (*_sigsegv_handler)(int) = NULL;
+static void (*_sigint_handler)(int) = NULL;
 
 
 static size_t _FB_memsize() {
@@ -59,15 +71,41 @@ static void _draw_frame(bitmap_t* bmp) {
 
 
 static int _init_keyboard() {
-    _FB.nkeys = 0;
-    initscr();
-    cbreak();
-    noecho();
-    intrflush(stdscr, FALSE);
-    keypad(stdscr, TRUE);
-    nodelay(stdscr, TRUE);
-    curs_set(0);
+    _FB.keyb_fd = 0;
+    if (_FB.keyb_fd < 0) {
+        fprintf(stderr, "Unable to open keyboard file descriptor\n");
+        return -1;
+    }
+    tcgetattr(_FB.keyb_fd, &_FB.saved_ts);
+    ioctl(_FB.keyb_fd, KDGKBMODE, &_FB.saved_kmode);
+
+    struct termios ts = _FB.saved_ts;
+    ts.c_cc[VTIME] = 0;     // Read timeout
+    ts.c_cc[VMIN] = 0;      // Non-blocking read, if nothing to read,
+                            // read will return 0
+    // Non-canonical mode, no echo and don't generate interruption signals
+    ts.c_lflag = ~(ICANON | ECHO | ISIG);
+    ts.c_iflag = ~(ISTRIP | INLCR | ICRNL | IGNCR | IXON | IXOFF);
+    ts.c_cflag = 0;
+    tcsetattr(_FB.keyb_fd, TCSAFLUSH, &ts);
+    ioctl(_FB.keyb_fd, KDSKBMODE, K_MEDIUMRAW);
+
+    memset(_FB.keys, 0, sizeof(_FB.keys));
+
     return 0;
+}
+
+
+static void _signal_handler(int signo) {
+    jcfb_stop(); 
+    if (signo == SIGSEGV) {
+        signal(SIGSEGV, _sigsegv_handler);
+        raise(SIGSEGV);
+    } else
+    if (signo == SIGINT) {
+        signal(SIGINT, _sigint_handler);
+        raise(SIGINT);
+    }
 }
 
 
@@ -77,6 +115,7 @@ int jcfb_start() {
         .mem = NULL,
         .page = 0,
         .page_max = 0,
+        .keyb_fd = -1,
     };
 
     _FB.fd = open("/dev/fb0", O_RDWR);
@@ -137,17 +176,19 @@ int jcfb_start() {
         goto error;
     }
 
+    atexit(jcfb_stop);
+    _sigsegv_handler = signal(SIGSEGV, _signal_handler);
+    _sigint_handler = signal(SIGINT, _signal_handler);
+
     return 0;
 
   error:
-    // XXX better wipe needed ?
-    if (_FB.fd >= 0) close(_FB.fd);
+    jcfb_stop();
     return -1;
 }
 
 
 void jcfb_stop() {
-    endwin();
     if (_FB.mem && _FB.mem != MAP_FAILED) {
         munmap(_FB.mem, _FB_memsize());
         _FB.mem = NULL;
@@ -156,6 +197,11 @@ void jcfb_stop() {
         ioctl(_FB.fd, FBIOPUT_VSCREENINFO, &_FB.saved_var_si);
         close(_FB.fd);
         _FB.fd = -1;
+    }
+    if (_FB.keyb_fd >= 0) {
+        tcsetattr(_FB.keyb_fd, TCSAFLUSH, &_FB.saved_ts);
+        ioctl(_FB.keyb_fd, KDSKBMODE, _FB.saved_kmode);
+        _FB.keyb_fd = -1;
     }
 }
 
@@ -172,29 +218,107 @@ bitmap_t* jcfb_get_bitmap() {
 }
 
 
-static void _update_keys() {
-    int key = 0;
-    while ((key = getch()) != ERR) {
-        if (_FB.nkeys < MAX_KEY_QUEUE) {
-            _FB.key_queue[_FB.nkeys++] = key;
+static keyc_t _raw_key_to_keyc(int table, unsigned char raw_key) {
+    keyc_t index = KEYC_UNKNOWN;
+    struct kbentry entry;
+    int val, type ;
+
+    entry.kb_table = table;
+    entry.kb_index = raw_key & 0x7f;
+    ioctl(_FB.keyb_fd, KDGKBENT, &entry);
+    type = KTYP(entry.kb_value);
+    val = KVAL(entry.kb_value);
+
+#define MAPPING(_K, _KC) \
+    case _K: index = _KC; break;
+
+    switch (type) {
+      case KT_FN:
+        if (val < 6) {
+            index = KEYC_F1 + val;
         } else {
-            fprintf(stdout, "JCFB key queue is full\n");
+            switch (val) {
+                MAPPING(22, KEYC_SUPPR)
+                MAPPING(21, KEYC_INSER)
+                MAPPING(20, KEYC_BEGIN)
+                MAPPING(24, KEYC_PAGE_UP)
+                MAPPING(25, KEYC_PAGE_DOWN)
+                MAPPING(23, KEYC_END)
+                MAPPING(29, KEYC_PAUSE)
+            }
         }
+        break;
+
+      case KT_LATIN:
+      case KT_LETTER:
+        if (val == 0x7f) {
+            index = KEYC_BACKSPACE;
+        } else
+        if (val == 0x1c) {
+            index = KEYC_PRINT;
+        } else {
+            index = val;
+            // Special case, we don't handle uppercase characters
+            if (isupper(index)) {
+                index = tolower(index);
+            }
+        }
+        break;
+
+      case KT_DEAD:
+        break;
+    }
+
+    switch (entry.kb_value) {
+      MAPPING(K_LEFT, KEYC_LEFT)
+      MAPPING(K_RIGHT, KEYC_RIGHT)
+      MAPPING(K_UP, KEYC_UP)
+      MAPPING(K_DOWN, KEYC_DOWN)
+      MAPPING(K_ENTER, KEYC_ENTER)
+      MAPPING(K_CTRL, KEYC_CTRL)
+      MAPPING(K_ALT, KEYC_ALT)
+      MAPPING(K_ALTGR, KEYC_ALTGR)
+      MAPPING(K_SHIFT, KEYC_SHIFT)
+    }
+
+    return index;
+}
+
+
+static void _update_keys() {
+    unsigned char raw_key = 0;
+    while (read(_FB.keyb_fd, &raw_key, 1) != 0) {
+        bool pressed = !(raw_key & 0x80);
+        int tab = K_NORMTAB;
+        if (_FB.keys[KEYC_SHIFT]) {
+            tab = K_SHIFTTAB;
+        } else
+        if (_FB.keys[KEYC_ALTGR]) {
+            tab = K_ALTTAB;
+        }
+        keyc_t key = _raw_key_to_keyc(tab, raw_key);
+        if (key != KEYC_UNKNOWN) {
+            _FB.keys[key] = pressed;
+        }
+    }
+
+    // Check for CTRL + C
+    if (_FB.keys[KEYC_CTRL] && _FB.keys[KEYC_C]) {
+        raise(SIGINT);
     }
 }
 
 
 void jcfb_refresh(bitmap_t* bmp) {
-    _draw_frame(bmp);
+    if (bmp) {
+        _draw_frame(bmp);
+    }
     _update_keys();
 }
 
 
-int jcfb_next_key() {
-    if (!_FB.nkeys) {
-        return -1;
-    }
-    return _FB.key_queue[--_FB.nkeys];
+bool jcfb_key_pressed(keyc_t key) {
+    return _FB.keys[key];
 }
 
 

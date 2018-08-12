@@ -168,16 +168,13 @@ int main(int argc, char** argv) {
 
     int exit = 0;
     while (!exit) {
-        int key = 0;
-        while ((key = jcfb_next_key()) >= 0) {
-            if (key == 27) {
-                exit = 1;
-            }
-            if (key == 10) {
-                nit = 1 + rand() % 100;
-                generate(width, height, iterations, nit);
-                draw(buffer, iterations, nit);
-            }
+        if (jcfb_key_pressed(KEYC_ESC)) {
+            exit = 1;
+        }
+        if (jcfb_key_pressed(KEYC_ENTER)) {
+            nit = 1 + rand() % 100;
+            generate(width, height, iterations, nit);
+            draw(buffer, iterations, nit);
         }
         jcfb_refresh(buffer);
         usleep(1E6 / 30);

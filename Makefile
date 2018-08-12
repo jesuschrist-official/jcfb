@@ -17,7 +17,7 @@ DBENCH=benchmarks
 # C Compiler
 CC=gcc
 CFLAGS=-Wall -std=gnu99 -Werror -I$(DINC)
-LDFLAGS=-lncurses -lm
+LDFLAGS=-lm
 ifeq ($(DEBUG),1)
 	CFLAGS+=-DDEBUG -g
 endif
@@ -32,11 +32,12 @@ SAMPLE=$(DBUILD)/sample.exe
 MANDELBROT=$(DBUILD)/mandelbrot.exe
 TETRIS=$(DBUILD)/tetris.exe
 TTF=$(DBUILD)/ttf.exe
+KEYBOARD=$(DBUILD)/keyboard.exe
 
 
 # Rules
-all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) $(TTF) tests \
-     benchmarks
+all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) $(TTF) $(KEYBOARD) \
+     tests benchmarks
 
 
 $(DOBJ)/%.o: $(DSRC)/%.c
@@ -69,6 +70,10 @@ $(TTF): $(JCFB) $(DSAMPLE)/ttf.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 
+$(KEYBOARD): $(JCFB) $(DSAMPLE)/keyboard.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
+
+
 tests: $(DBUILD)/pixel.test
 
 
@@ -94,11 +99,13 @@ $(DBUILD):
 install: $(JCFB)
 	cp $(JCFB) $(INSTALLATION_PATH)/lib
 	cp -r $(DINC)/jcfb $(INSTALLATION_PATH)/include
+	cp -r $(DINC)/stb $(INSTALLATION_PATH)/include
 
 
 uninstall:
 	rm $(INSTALLATION_PATH)/lib/libjcfb.a
 	rm -rf $(INSTALLATION_PATH)/include/jcfb
+	rm -rf $(INSTALLATION_PATH)/include/stb
 
 
 clean:

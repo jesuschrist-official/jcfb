@@ -437,23 +437,20 @@ int main(int argc, char** argv) {
     start_game();
     int exit = 0;
     while (!exit) {
-        int key = 0;
-        while ((key = jcfb_next_key()) >= 0) {
-            if (key == 27) {
-                exit = 1;
-            } else
-            if (key == KEY_LEFT) {
-                move_left();
-            } else
-            if (key == KEY_RIGHT) {
-                move_right();
-            } else
-            if (key == 'r' || key == KEY_UP) {
-                rotate_clock();
-            } else
-            if (key == ' ' || key == KEY_DOWN) {
-                hard_drop();
-            }
+        if (jcfb_key_pressed(KEYC_ESC)) {
+            exit = 1;
+        }
+        if (jcfb_key_pressed(KEYC_LEFT)) {
+            move_left();
+        } else
+        if (jcfb_key_pressed(KEYC_RIGHT)) {
+            move_right();
+        } else
+        if (jcfb_key_pressed(KEYC_R) || jcfb_key_pressed(KEYC_UP)) {
+            rotate_clock();
+        } else
+        if (jcfb_key_pressed(KEYC_DOWN)) {
+            hard_drop();
         }
         loop_game();
 
