@@ -33,10 +33,12 @@ MANDELBROT=$(DBUILD)/mandelbrot.exe
 TETRIS=$(DBUILD)/tetris.exe
 TTF=$(DBUILD)/ttf.exe
 KEYBOARD=$(DBUILD)/keyboard.exe
+MOVE=$(DBUILD)/move.exe
 
 
 # Rules
-all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) $(TTF) $(KEYBOARD) \
+all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) $(TTF) \
+	 $(KEYBOARD) $(MOVE) \
      tests benchmarks
 
 
@@ -71,6 +73,10 @@ $(TTF): $(JCFB) $(DSAMPLE)/ttf.c
 
 
 $(KEYBOARD): $(JCFB) $(DSAMPLE)/keyboard.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
+
+
+$(MOVE): $(JCFB) $(DSAMPLE)/move.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 

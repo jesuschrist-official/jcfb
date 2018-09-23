@@ -28,7 +28,7 @@ enum {
  * Bitmap structure
  */
 typedef struct bitmap {
-    size_t w, h;
+    int w, h;
     pixfmt_id_t fmt;
     pixel_t* mem;
     uint32_t flags;
@@ -92,7 +92,7 @@ void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
  * to dimensions (dw, dh).
  */
 void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
-                        int x, int y, int dw, int dh);
+                        int x, int y, int w, int h);
 
 
 /*
