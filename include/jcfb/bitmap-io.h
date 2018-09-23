@@ -1,6 +1,7 @@
 #ifndef _jcfb_bitmap_loading_h_
 #define _jcfb_bitmap_loading_h_
 
+
 #include "jcfb/bitmap.h"
 
 

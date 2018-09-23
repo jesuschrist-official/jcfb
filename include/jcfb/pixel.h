@@ -1,11 +1,12 @@
 /*
  * Pixel manipulation.
  *
- * This module provides tools to do color conversion between various pixel
- * formats.
+ * This module provides tools to do color conversion between various
+ * pixel formats.
  */
 #ifndef _jcfb_pixel_h_
 #define _jcfb_pixel_h_
+
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -21,6 +22,7 @@ typedef enum {
     COMP_ALPHA,
     COMP_MAX,
 } component_t;
+
 
 /*
  * Most common pixel formats enumeration
@@ -39,7 +41,8 @@ typedef enum {
  * Pixel format
  *
  * This structure is used to define the format a pixel has.
- * A pixfmt_t allows to define what size & offset has a color component.
+ * A pixfmt_t allows to define what size & offset has a color
+ * component.
  * This structure can be used to compute pixel conversions.
  */
 typedef struct pixfmt {
@@ -48,7 +51,6 @@ typedef struct pixfmt {
     uint32_t sizes[COMP_MAX]; /* Components length */
     // XXX Maybe we'll need Big/Little Endian information
 } pixfmt_t;
-
 
 
 /*

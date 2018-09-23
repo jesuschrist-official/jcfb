@@ -8,9 +8,6 @@ static pixfmt_t _PIXFMTS[] = {
      [PIXFMT_FB] = {0},
      [PIXFMT_RGB16] = {
         .bpp = 16,
-        // XXX We chose red first, but maybe it's a wrong choice!
-        //     Best would be to detect at bitmap loading if it is a LSB pixel
-        //     format or not ?
         .offs = {11, 5, 0, 0},
         .sizes = {5, 6, 5, 0},
      },
@@ -48,7 +45,9 @@ void pixfmt_set_fb(const pixfmt_t* fmt) {
 }
 
 
-static uint32_t _comp_conv_32(uint32_t off, uint32_t size, uint32_t comp) {
+static uint32_t _comp_conv_32(uint32_t off, uint32_t size,
+                              uint32_t comp)
+{
     assert(!(comp & 0xffffff00));
     if (8 > size) {
         comp >>= (8 - size);
@@ -61,19 +60,27 @@ static uint32_t _comp_conv_32(uint32_t off, uint32_t size, uint32_t comp) {
 
 pixel_t pixel(pixel_t rgba32) {
     static const pixfmt_t* fmt = &_PIXFMTS[PIXFMT_FB];
-    return _comp_conv_32(fmt->offs[0], fmt->sizes[0], ((rgba32 >> 0 ) & 0xff))
-         | _comp_conv_32(fmt->offs[1], fmt->sizes[1], ((rgba32 >> 8 ) & 0xff))
-         | _comp_conv_32(fmt->offs[2], fmt->sizes[2], ((rgba32 >> 16) & 0xff))
-         | _comp_conv_32(fmt->offs[3], fmt->sizes[3], ((rgba32 >> 24) & 0xff));
+    return _comp_conv_32(fmt->offs[0], fmt->sizes[0],
+                         ((rgba32 >> 0 ) & 0xff))
+         | _comp_conv_32(fmt->offs[1], fmt->sizes[1],
+                         ((rgba32 >> 8 ) & 0xff))
+         | _comp_conv_32(fmt->offs[2], fmt->sizes[2],
+                         ((rgba32 >> 16) & 0xff))
+         | _comp_conv_32(fmt->offs[3], fmt->sizes[3],
+                         ((rgba32 >> 24) & 0xff));
 }
 
 
 pixel_t pixel_to(pixfmt_id_t fmt_id, pixel_t rgba32) {
     const pixfmt_t* fmt = &_PIXFMTS[fmt_id];
-    return _comp_conv_32(fmt->offs[0], fmt->sizes[0], ((rgba32 >> 0 ) & 0xff))
-         | _comp_conv_32(fmt->offs[1], fmt->sizes[1], ((rgba32 >> 8 ) & 0xff))
-         | _comp_conv_32(fmt->offs[2], fmt->sizes[2], ((rgba32 >> 16) & 0xff))
-         | _comp_conv_32(fmt->offs[3], fmt->sizes[3], ((rgba32 >> 24) & 0xff));
+    return _comp_conv_32(fmt->offs[0], fmt->sizes[0],
+                         ((rgba32 >> 0 ) & 0xff))
+         | _comp_conv_32(fmt->offs[1], fmt->sizes[1],
+                         ((rgba32 >> 8 ) & 0xff))
+         | _comp_conv_32(fmt->offs[2], fmt->sizes[2],
+                         ((rgba32 >> 16) & 0xff))
+         | _comp_conv_32(fmt->offs[3], fmt->sizes[3],
+                         ((rgba32 >> 24) & 0xff));
 }
 
 
@@ -91,7 +98,8 @@ static uint32_t _comp_conv(uint32_t in_off, uint32_t in_size,
 }
 
 
-pixel_t pixel_conv(pixfmt_id_t in_fmt_id, pixfmt_id_t out_fmt_id, pixel_t p)
+pixel_t pixel_conv(pixfmt_id_t in_fmt_id, pixfmt_id_t out_fmt_id,
+                   pixel_t p)
 {
     if (in_fmt_id == out_fmt_id) {
         return p;
@@ -126,14 +134,14 @@ int main(void) {
     // TEST pixel
     src = 0x04c08040;
     dst = pixel_to(PIXFMT_RGB16, src);
-    // Red is rshifted by three (0x40 >> 3 == 0x08) and positioned at offset
-    // 11. The maximal value of red is 2^6 - 1 == 0x1f.
+    // Red is rshifted by three (0x40 >> 3 == 0x08) and positioned at
+    // offset 11. The maximal value of red is 2^6 - 1 == 0x1f.
     assert(((dst >> 11) & 0x1f) == 0x08);
-    // Green is rshifted by 2 (0x80 >> 2 == 0x20) and positioned at offset
-    // 5. The maximal value of green is 2^7 - 1 == 0x3f.
+    // Green is rshifted by 2 (0x80 >> 2 == 0x20) and positioned at
+    // offset 5. The maximal value of green is 2^7 - 1 == 0x3f.
     assert(((dst >> 5) & 0x3f) == 0x20);
-    // Blue is rshifted by 3 (0xc0 >> 3 == 0x18) and positioned at offset
-    // 0. The maximal value of blue is 2^6 - 1 == 0x1f.
+    // Blue is rshifted by 3 (0xc0 >> 3 == 0x18) and positioned at
+    // offset 0. The maximal value of blue is 2^6 - 1 == 0x1f.
     assert(((dst >> 0) & 0x1f) == 0x18);
     // Pixels beyond 0xffff should be zero
     assert((dst & 0xffff0000) == 0);

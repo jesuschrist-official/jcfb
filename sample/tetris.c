@@ -12,7 +12,7 @@
 
 #define MAX(_x, _y) (((_x) > (_y)) ? (_x) : (_y))
 
-// Tetrimino ------------------------------------------------------------------
+// Tetrimino -----------------------------------------------------------
 typedef enum {
     TETRIMINO_EMPTY = 0,
     TETRIMINO_I = 1,
@@ -29,8 +29,8 @@ typedef enum {
 typedef struct tetrimino {
     tetrimino_id_t id;
     int w, h;
-    char mask[6];   // Max size is 6 since max dimensions are (3, 2) for the
-                    // L-shaped tetriminos
+    char mask[6];   // Max size is 6 since max dimensions are (3, 2)
+                    // for the L-shaped tetriminos
 } tetrimino_t;
 
 
@@ -138,10 +138,10 @@ void clock_rotate_tetrimino(const tetrimino_t* t, tetrimino_t* r) {
 }
 
 
-// Game -----------------------------------------------------------------------
+// Game ---------------------------------------------------------------
 /*
- * The board is 22x10 sized. First two lines are the top of the board (where
- * pieces spawn). They will be hidden when drawing.
+ * The board is 22x10 sized. First two lines are the top of the board
+ * (where pieces spawn). They will be hidden when drawing.
  */
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 22
@@ -167,8 +167,8 @@ game_t _G;
 
 
 /*
- * Return true if the piece at position (tx, ty) is at an invalid slot on the
- * board:
+ * Return true if the piece at position (tx, ty) is at an invalid slot
+ * on the board:
  * - the piece is out of the board ;
  * - the piece overlaps with a non-empty tile ;
  */
@@ -178,7 +178,8 @@ bool has_valid_position(int tx, int ty, const tetrimino_t* t) {
     int right = tx + t->w;
     int top = ty;
     int bottom = ty + t->h;
-    if (left < 0 || right > BOARD_WIDTH || top < 0 || bottom > BOARD_HEIGHT)
+    if (left < 0 || right > BOARD_WIDTH || top < 0
+    ||  bottom > BOARD_HEIGHT)
     {
         // Out of bounds
         return false;
@@ -283,7 +284,8 @@ void spawn_tetrimino() {
  */
 void start_game() {
     memset(&_G.tetrimino, 0, sizeof(tetrimino_t));
-    memset(_G.board, 0, BOARD_WIDTH * BOARD_HEIGHT * sizeof(tetrimino_id_t));
+    memset(_G.board, 0,
+           BOARD_WIDTH * BOARD_HEIGHT * sizeof(tetrimino_id_t));
     spawn_tetrimino();
     _G.lost = false;
     _G.loop_count = 0;
@@ -354,7 +356,7 @@ void hard_drop() {
 }
 
 
-// Display --------------------------------------------------------------------
+// Display ------------------------------------------------------------
 enum colors {
     CYAN = 0x0077ff00,
     YELLOW = 0x0000ffff,
@@ -416,7 +418,7 @@ void draw_game(bitmap_t* bmp) {
 }
 
 
-// ----------------------------------------------------------------------------
+// --------------------------------------------------------------------
 int main(int argc, char** argv) {
     srand(time(NULL));
 
@@ -455,9 +457,11 @@ int main(int argc, char** argv) {
         loop_game();
 
         bitmap_clear(buffer, 0x00000000);
-        draw_vline(buffer, pixel(0x00ffffff), buffer->w / 2 - board.w / 2 - 1,
+        draw_vline(buffer, pixel(0x00ffffff),
+                   buffer->w / 2 - board.w / 2 - 1,
                    0, buffer->h);
-        draw_vline(buffer, pixel(0x00ffffff), buffer->w / 2 + board.w / 2 + 1,
+        draw_vline(buffer, pixel(0x00ffffff),
+                   buffer->w / 2 + board.w / 2 + 1,
                    0, buffer->h);
         draw_hline(buffer, pixel(0x00ffffff),
                    buffer->w / 2 - board.w / 2,
@@ -469,10 +473,12 @@ int main(int argc, char** argv) {
 
         char str_buffer[256];
         sprintf(str_buffer, "Level %d", _G.level);
-        ttf_render(&font, str_buffer, buffer, buffer->w / 2 + board.w / 2 + 10,
+        ttf_render(&font, str_buffer, buffer,
+                   buffer->w / 2 + board.w / 2 + 10,
                    24, 24, 0x0055cc22);
         sprintf(str_buffer, "Score %d", _G.score);
-        ttf_render(&font, str_buffer, buffer, buffer->w / 2 + board.w / 2 + 10,
+        ttf_render(&font, str_buffer, buffer,
+                   buffer->w / 2 + board.w / 2 + 10,
                    48, 24, 0x00cc5500);
 
         jcfb_refresh(buffer);

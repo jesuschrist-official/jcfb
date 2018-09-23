@@ -16,7 +16,7 @@ DBENCH=benchmarks
 
 # C Compiler
 CC=gcc
-CFLAGS=-Wall -std=gnu99 -Werror -I$(DINC)
+CFLAGS=-Wall -std=gnu99 -I$(DINC)
 LDFLAGS=-lm
 ifeq ($(DEBUG),1)
 	CFLAGS+=-DDEBUG -g

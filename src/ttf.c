@@ -2,6 +2,7 @@
 #include <string.h>
 #include "jcfb/ttf.h"
 
+
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb/stb_truetype.h"
 
@@ -45,7 +46,9 @@ void ttf_render_cp(const ttf_font_t* font, int cp, bitmap_t* bmp,
                    int x, int y, int height, pixel_t color)
 {
 #if 0
-STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo *info, int *ascent, int *descent, int *lineGap);
+STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo *info,
+                                     int *ascent, int *descent,
+                                     int *lineGap);
 #endif
     float scale = stbtt_ScaleForPixelHeight(&font->font_info, height);
     int w, h, off_y;
@@ -71,7 +74,8 @@ void ttf_render(const ttf_font_t* font, const char* str, bitmap_t* bmp,
         int cp = str[i];
         ttf_render_cp(font, cp, bmp, x, y, height, color);    
         int advance;
-        stbtt_GetCodepointHMetrics(&font->font_info, cp, &advance, NULL);
+        stbtt_GetCodepointHMetrics(&font->font_info, cp, &advance,
+                                   NULL);
         x += advance * scale * 1.2;
     }
 }

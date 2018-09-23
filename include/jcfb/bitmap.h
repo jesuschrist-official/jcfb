@@ -2,12 +2,13 @@
  * Bitmap module
  *
  * Load, create and manipulate bitmaps.
- * Many bitmaps functions assume JCFB has been started and framebuffer pixel
- * format has been set. Calling thus functions in such context is an undefined
- * behaviour.
+ * Many bitmaps functions assume JCFB has been started and framebuffer
+ * pixel format has been set. Calling thus functions in such context is
+ * an undefined behaviour.
  */
 #ifndef _jcfb_bitmap_h_
 #define _jcfb_bitmap_h_
+
 
 #include "jcfb/pixel.h"
 
@@ -35,8 +36,8 @@ typedef struct bitmap {
 
 
 /*
- * Initialize a bitmap having the given dimensions and the PIXFMT_FB pixel
- * format.
+ * Initialize a bitmap having the given dimensions and the PIXFMT_FB
+ * pixel format.
  */
 int bitmap_init(bitmap_t* bmp, int w, int h);
 
@@ -87,18 +88,19 @@ void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
 
 
 /*
- * Blit the `src` bitmap at the given position of `dest` bitmap, scaled to
- * dimensions (dw, dh).
+ * Blit the `src` bitmap at the given position of `dest` bitmap, scaled
+ * to dimensions (dw, dh).
  */
 void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
                         int x, int y, int dw, int dh);
 
 
 /*
- * Blit the `src` bitmap at the given position of `dest` bitmap. Skip masked
- * pixels.
+ * Blit the `src` bitmap at the given position of `dest` bitmap. Skip
+ * masked pixels.
  */
-void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
+void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
+                        int x, int y);
 
 
 /*

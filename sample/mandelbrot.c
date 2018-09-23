@@ -11,7 +11,7 @@
 #include "jcfb/jcfb.h"
 
 
-// Mandelbrot -----------------------------------------------------------------
+// Mandelbrot ---------------------------------------------------------
 void rand_dimensions(float* xmin, float* xmax, float* ymin, float* ymax)
 {
     float width = 3.5;
@@ -85,7 +85,7 @@ void generate(int width, int height, int* iterations, int it_max) {
 }
 
 
-// Rendering ------------------------------------------------------------------
+// Rendering ----------------------------------------------------------
 static int color_cos(int i, int size) {
     return (1 + cos((i / (float) size) * M_PI)) * 0.5 * 0xff;
 }
@@ -148,7 +148,7 @@ void draw(bitmap_t* bmp, const int* iterations, int it_max) {
 }
 
 
-// ----------------------------------------------------------------------------
+// --------------------------------------------------------------------
 int main(int argc, char** argv) {
     if (jcfb_start() < 0) {
         fprintf(stderr, "Cannot start JCFB\n");

@@ -4,7 +4,9 @@
 #ifndef _jcfb_h_
 #define _jcfb_h_
 
-#include <ncurses.h> // For KEY_* symbols export
+
+#include <stdbool.h>
+
 
 #include "jcfb/pixel.h"
 #include "jcfb/bitmap.h"

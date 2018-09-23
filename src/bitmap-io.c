@@ -11,7 +11,7 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
     int w, h, n;
     pixel_t* data = (pixel_t*)stbi_load(path, &w, &h, &n, 4);
     if (!data) {
-        fprintf(stderr, "Couldn't read file '%s'\n", path);
+        fprintf(stderr, "Couldn't read image file '%s'\n", path);
         goto error;
     }
     if (bitmap_init(bmp, w, h) != 0) {
@@ -23,7 +23,8 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
     for (size_t y = 0; y < h; y++) {
         for (size_t x = 0; x < w; x++) {
             *dst = pixel_conv(PIXFMT_ABGR32, bmp->fmt, *src);
-            // Handling alpha
+            // Map full-alpha to our mask color (bright purple).
+            // We doesn't support other alpha values.
             if ((*src & 0x000000ff) == 0x000000ff) {
                 *dst = pixel_to(bmp->fmt, 0x00ff00ff);
             }

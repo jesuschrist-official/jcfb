@@ -13,6 +13,7 @@
 #include <linux/kd.h>
 #include <linux/keyboard.h>
 
+
 #include "jcfb/jcfb.h"
 #include "jcfb/pixel.h"
 #include "jcfb/bitmap.h"
@@ -83,7 +84,8 @@ static int _init_keyboard() {
     ts.c_cc[VTIME] = 0;     // Read timeout
     ts.c_cc[VMIN] = 0;      // Non-blocking read, if nothing to read,
                             // read will return 0
-    // Non-canonical mode, no echo and don't generate interruption signals
+    // Non-canonical mode, no echo and don't generate interruption
+    // signals
     ts.c_lflag = ~(ICANON | ECHO | ISIG);
     ts.c_iflag = ~(ISTRIP | INLCR | ICRNL | IGNCR | IXON | IXOFF);
     ts.c_cflag = 0;
@@ -118,23 +120,28 @@ int jcfb_start() {
         .keyb_fd = -1,
     };
 
-    _FB.fd = open("/dev/fb0", O_RDWR);
-    if (_FB.fd < 0) {
-        fprintf(stderr, "No framebuffer file descriptor");
-        goto error;
-    }
-
+    // Retrieves framebuffer information
     struct fb_fix_screeninfo fix_si;
     struct fb_var_screeninfo var_si;
-    if (ioctl(_FB.fd, FBIOGET_FSCREENINFO, &fix_si) < 0) {
-        fprintf(stderr, "Unable to read framebuffer information");
+    _FB.fd = open("/dev/fb0", O_RDWR);
+    if (_FB.fd < 0) {
+        fprintf(stderr, "No framebuffer file descriptor\n");
         goto error;
     }
-    if (ioctl(_FB.fd, FBIOGET_VSCREENINFO, &var_si) < 0) {
-        fprintf(stderr, "Unable to read framebuffer information");
+    if (ioctl(_FB.fd, FBIOGET_FSCREENINFO, &fix_si) < 0
+    ||  ioctl(_FB.fd, FBIOGET_VSCREENINFO, &var_si) < 0)
+    {
+        fprintf(stderr, "Unable to read framebuffer information\n");
         goto error;
     }
 
+    // Check for internal constraints
+    if (var_si.bits_per_pixel < 8) {
+        fprintf(stderr, "JCFB needs at least 8 bits of color depth\n");
+        goto error;
+    }
+
+    // Framebuffer pixel format
     pixfmt_t fmt = (pixfmt_t){
         .bpp = var_si.bits_per_pixel,
         .offs = {
@@ -150,32 +157,39 @@ int jcfb_start() {
             [COMP_ALPHA] = var_si.transp.length,
         }
     };
-    assert((var_si.bits_per_pixel >= 8) && "BPP >= 8 is mandatory");
     pixfmt_set_fb(&fmt);
     memcpy(&_FB.fmt, &fmt, sizeof(pixfmt_t));
 
+    // Store framebuffer information in local memory
     memcpy(&_FB.fix_si, &fix_si, sizeof(struct fb_fix_screeninfo));
     memcpy(&_FB.var_si, &var_si, sizeof(struct fb_var_screeninfo));
-    memcpy(&_FB.saved_fix_si, &fix_si, sizeof(struct fb_fix_screeninfo));
-    memcpy(&_FB.saved_var_si, &var_si, sizeof(struct fb_var_screeninfo));
+    memcpy(&_FB.saved_fix_si, &fix_si,
+           sizeof(struct fb_fix_screeninfo));
+    memcpy(&_FB.saved_var_si, &var_si,
+           sizeof(struct fb_var_screeninfo));
 
+    // Map framebuffer memory
     _FB.mem = mmap(NULL, _FB_memsize(),
                    PROT_READ | PROT_WRITE, MAP_SHARED, _FB.fd, 0);
     if (_FB.mem == MAP_FAILED) {
-        fprintf(stderr, "Unable to map framebuffer into program memory\n");
+        fprintf(stderr,
+                "Unable to map framebuffer into program memory\n");
         goto error;
     }
     memset(_FB.mem, 0, _FB_memsize());
 
+    // Scroll framebuffer to the start of its memory
     _FB.var_si.xoffset = 0;
     _FB.var_si.yoffset = 0;
     ioctl(_FB.fd, FBIOPUT_VSCREENINFO, &_FB.var_si);
 
+    // Initialize the keyboard
     if (_init_keyboard() < 0) {
         fprintf(stderr, "Unable to initialize the keyboard\n");
         goto error;
     }
 
+    // Signals registration
     atexit(jcfb_stop);
     _sigsegv_handler = signal(SIGSEGV, _signal_handler);
     _sigint_handler = signal(SIGINT, _signal_handler);
