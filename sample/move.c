@@ -15,16 +15,18 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    bitmap_t* screen = jcfb_get_bitmap();
+    bitmap_clear(screen, 0x00000000);
+
+    bitmap_t buffer;
+    bitmap_init(&buffer, 640, 400);
+
     bitmap_t player;
     if (bitmap_load(&player, "data/player.bmp") != 0) {
         return 1;
     }
-    int player_x = jcfb_width() / 2 - player.w / 2,
-        player_y = jcfb_height() / 2 - player.h / 2;
-
-    bitmap_t* buffer = jcfb_get_bitmap();
-    bitmap_clear(buffer, 0x00000000);
-
+    int player_x = 640 / 2 - player.w / 2,
+        player_y = 400 / 2 - player.h / 2;
 
     int exit = 0;
     while (!exit) {
@@ -43,15 +45,18 @@ int main(int argc, char** argv) {
         if (jcfb_key_pressed(KEYC_RIGHT)) {
             player_x += 16;
         }
-        bitmap_clear(buffer, 0x00000000);
-        bitmap_blit(buffer, &player, player_x, player_y);
-        jcfb_refresh(buffer);
+        bitmap_clear(&buffer, 0x00000000);
+        bitmap_masked_blit(&buffer, &player, player_x, player_y);
+        bitmap_scaled_blit(screen, &buffer, 0, 0,
+                           screen->w, screen->h);
+        jcfb_refresh(screen);
         usleep(1000);
     }
 
     bitmap_wipe(&player);
-    bitmap_wipe(buffer);
-    free(buffer);
+    bitmap_wipe(&buffer);
+    bitmap_wipe(screen);
+    free(screen);
 
     jcfb_stop();
     printf("Gentle quit\n");
