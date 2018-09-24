@@ -439,19 +439,19 @@ int main(int argc, char** argv) {
     start_game();
     int exit = 0;
     while (!exit) {
-        if (jcfb_key_pressed(KEYC_ESC)) {
+        if (is_key_pressed(KEYC_ESC)) {
             exit = 1;
         }
-        if (jcfb_key_pressed(KEYC_LEFT)) {
+        if (is_key_pressed(KEYC_LEFT)) {
             move_left();
         } else
-        if (jcfb_key_pressed(KEYC_RIGHT)) {
+        if (is_key_pressed(KEYC_RIGHT)) {
             move_right();
         } else
-        if (jcfb_key_pressed(KEYC_R) || jcfb_key_pressed(KEYC_UP)) {
+        if (is_key_pressed(KEYC_R) || is_key_pressed(KEYC_UP)) {
             rotate_clock();
         } else
-        if (jcfb_key_pressed(KEYC_DOWN)) {
+        if (is_key_pressed(KEYC_DOWN)) {
             hard_drop();
         }
         loop_game();

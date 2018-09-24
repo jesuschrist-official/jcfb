@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 
     int exit = 0;
     while (!exit) {
-        if (jcfb_key_pressed(KEYC_ESC)) {
+        if (is_key_pressed(KEYC_ESC)) {
             exit = 1;
         }
         jcfb_refresh(buffer);

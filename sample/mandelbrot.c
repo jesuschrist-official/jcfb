@@ -168,10 +168,10 @@ int main(int argc, char** argv) {
 
     int exit = 0;
     while (!exit) {
-        if (jcfb_key_pressed(KEYC_ESC)) {
+        if (is_key_pressed(KEYC_ESC)) {
             exit = 1;
         }
-        if (jcfb_key_pressed(KEYC_ENTER)) {
+        if (is_key_pressed(KEYC_ENTER)) {
             nit = 1 + rand() % 100;
             generate(width, height, iterations, nit);
             draw(buffer, iterations, nit);

@@ -30,19 +30,19 @@ int main(int argc, char** argv) {
 
     int exit = 0;
     while (!exit) {
-        if (jcfb_key_pressed(KEYC_ESC)) {
+        if (is_key_pressed(KEYC_ESC)) {
             exit = 1;
         }
-        if (jcfb_key_pressed(KEYC_UP)) {
+        if (is_key_pressed(KEYC_UP)) {
             player_y -= 16;
         }
-        if (jcfb_key_pressed(KEYC_DOWN)) {
+        if (is_key_pressed(KEYC_DOWN)) {
             player_y += 16;
         }
-        if (jcfb_key_pressed(KEYC_LEFT)) {
+        if (is_key_pressed(KEYC_LEFT)) {
             player_x -= 16;
         }
-        if (jcfb_key_pressed(KEYC_RIGHT)) {
+        if (is_key_pressed(KEYC_RIGHT)) {
             player_x += 16;
         }
         bitmap_clear(&buffer, 0x00000000);

@@ -51,7 +51,8 @@ $(JCFB): $(DOBJ)/pixel.o \
          $(DOBJ)/bitmap.o \
          $(DOBJ)/bitmap-io.o \
          $(DOBJ)/primitive.o \
-         $(DOBJ)/ttf.o
+         $(DOBJ)/ttf.o \
+         $(DOBJ)/keyboard.o
 	$(AR) rvs $@ $^
 
 
