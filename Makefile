@@ -16,7 +16,7 @@ DBENCH=benchmarks
 
 # C Compiler
 CC=gcc
-CFLAGS=-Wall -std=gnu99 -I$(DINC)
+CFLAGS=-Wall -Werror -std=gnu99 -I$(DINC)
 LDFLAGS=-lm
 ifeq ($(DEBUG),1)
 	CFLAGS+=-DDEBUG -g
@@ -28,18 +28,17 @@ endif
 
 # Targets
 JCFB=$(DBUILD)/libjcfb.a
-SAMPLE=$(DBUILD)/sample.exe
-MANDELBROT=$(DBUILD)/mandelbrot.exe
-TETRIS=$(DBUILD)/tetris.exe
-TTF=$(DBUILD)/ttf.exe
-KEYBOARD=$(DBUILD)/keyboard.exe
-MOVE=$(DBUILD)/move.exe
+
+PRINT=$(DBUILD)/$(DSAMPLE)/print.exe
+MANDELBROT=$(DBUILD)/$(DSAMPLE)/mandelbrot.exe
+TETRIS=$(DBUILD)/$(DSAMPLE)/tetris.exe
+TTF=$(DBUILD)/$(DSAMPLE)/ttf.exe
+KEYBOARD=$(DBUILD)/$(DSAMPLE)/keyboard.exe
+MOVE=$(DBUILD)/$(DSAMPLE)/move.exe
 
 
 # Rules
-all: $(DBUILD) $(JCFB) $(SAMPLE) $(MANDELBROT) $(TETRIS) $(TTF) \
-	 $(KEYBOARD) $(MOVE) \
-     tests benchmarks
+all: $(DBUILD) $(JCFB) samples tests benchmarks
 
 
 $(DOBJ)/%.o: $(DSRC)/%.c
@@ -56,9 +55,11 @@ $(JCFB): $(DOBJ)/pixel.o \
 	$(AR) rvs $@ $^
 
 
-$(SAMPLE): $(JCFB) $(DSAMPLE)/sample.c
+samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE)
+
+
+$(PRINT): $(JCFB) $(DSAMPLE)/print.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS)
-	cp sample/tiger.bmp $(DBUILD)
 
 
 $(MANDELBROT): $(JCFB) $(DSAMPLE)/mandelbrot.c
@@ -73,32 +74,31 @@ $(TTF): $(JCFB) $(DSAMPLE)/ttf.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 
-$(KEYBOARD): $(JCFB) $(DSAMPLE)/keyboard.c
-	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
-
-
 $(MOVE): $(JCFB) $(DSAMPLE)/move.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 
-tests: $(DBUILD)/pixel.test
+tests: $(DBUILD)/$(DTESTS)/pixel.test
 
 
-$(DBUILD)/pixel.test: $(DSRC)/pixel.c
+$(DBUILD)/$(DTESTS)/pixel.test: $(DSRC)/pixel.c
 	$(CC) $(CFLAGS) -DTEST $^ -o $@
 
 
-benchmarks: $(DBUILD)/pixel-conversion.bench \
-            $(DBUILD)/bitmap-blit.bench \
-            $(DBUILD)/jcfb-refresh.bench
+benchmarks: $(DBUILD)/$(DBENCH)/pixel-conversion.bench \
+            $(DBUILD)/$(DBENCH)/bitmap-blit.bench \
+            $(DBUILD)/$(DBENCH)/jcfb-refresh.bench
 
 
-$(DBUILD)/%.bench: $(DBENCH)/%.c
+$(DBUILD)/$(DBENCH)/%.bench: $(DBENCH)/%.c
 	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb -lncurses
 
 
 $(DBUILD):
 	mkdir -p $(DBUILD)
+	mkdir -p $(DBUILD)/$(DSAMPLE)
+	mkdir -p $(DBUILD)/$(DBENCH)
+	mkdir -p $(DBUILD)/$(DTESTS)
 	mkdir -p $(DOBJ)
 	cp -r data/ $(DBUILD)
 
