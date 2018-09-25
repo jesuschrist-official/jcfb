@@ -9,8 +9,6 @@
 #include <linux/keyboard.h>
 
 
-
-
 #include "jcfb/keyboard.h"
 
 
@@ -19,7 +17,6 @@
 static const char* key_names[KEYC_MAX] = {
     [KEYC_TAB] = "KEYC_TAB",
     [KEYC_ENTER] = "KEYC_ENTER",
-
     [KEYC_ESC] = "KEYC_ESC",
 
     [KEYC_SPACE] = "KEYC_SPACE",
@@ -38,7 +35,6 @@ static const char* key_names[KEYC_MAX] = {
     [KEYC_DASH] = "KEYC_DASH",
     [KEYC_DOT] = "KEYC_DOT",
     [KEYC_SLASH] = "KEYC_SLASH",
-
     [KEYC_0] = "KEYC_0",
     [KEYC_1] = "KEYC_1",
     [KEYC_2] = "KEYC_2",
@@ -49,7 +45,6 @@ static const char* key_names[KEYC_MAX] = {
     [KEYC_7] = "KEYC_7",
     [KEYC_8] = "KEYC_8",
     [KEYC_9] = "KEYC_9",
-
     [KEYC_DOUBLE_DOT] = "KEYC_DOUBLE_DOT",
     [KEYC_SEMICOLON] = "KEYC_SEMICOLON",
     [KEYC_LT] = "KEYC_LT",
@@ -57,14 +52,6 @@ static const char* key_names[KEYC_MAX] = {
     [KEYC_GT] = "KEYC_GT",
     [KEYC_QUESTION_MARK] = "KEYC_QUESTION_MARK",
     [KEYC_AT] = "KEYC_AT",
-
-    [KEYC_LBRACKET] = "KEYC_LBRACKET",
-    [KEYC_BACKSLASH] = "KEYC_BACKSLASH",
-    [KEYC_RBRACKET] = "KEYC_RBRACKET",
-    [KEYC_CIRCUMFLEX] = "KEYC_CIRCUMFLEX",
-    [KEYC_UNDERSCORE] = "KEYC_UNDERSCORE",
-    [KEYC_GRAVE_ACCENT] = "KEYC_GRAVE_ACCENT",
-
     [KEYC_A] = "KEYC_A",
     [KEYC_B] = "KEYC_B",
     [KEYC_C] = "KEYC_C",
@@ -91,7 +78,38 @@ static const char* key_names[KEYC_MAX] = {
     [KEYC_X] = "KEYC_X",
     [KEYC_Y] = "KEYC_Y",
     [KEYC_Z] = "KEYC_Z",
-
+    [KEYC_LBRACKET] = "KEYC_LBRACKET",
+    [KEYC_BACKSLASH] = "KEYC_BACKSLASH",
+    [KEYC_RBRACKET] = "KEYC_RBRACKET",
+    [KEYC_CIRCUMFLEX] = "KEYC_CIRCUMFLEX",
+    [KEYC_UNDERSCORE] = "KEYC_UNDERSCORE",
+    [KEYC_GRAVE_ACCENT] = "KEYC_GRAVE_ACCENT",
+    [KEYC_a] = "KEYC_a",
+    [KEYC_b] = "KEYC_b",
+    [KEYC_c] = "KEYC_c",
+    [KEYC_d] = "KEYC_d",
+    [KEYC_e] = "KEYC_e",
+    [KEYC_f] = "KEYC_f",
+    [KEYC_g] = "KEYC_g",
+    [KEYC_h] = "KEYC_h",
+    [KEYC_i] = "KEYC_i",
+    [KEYC_j] = "KEYC_j",
+    [KEYC_k] = "KEYC_k",
+    [KEYC_l] = "KEYC_l",
+    [KEYC_m] = "KEYC_m",
+    [KEYC_n] = "KEYC_n",
+    [KEYC_o] = "KEYC_o",
+    [KEYC_p] = "KEYC_p",
+    [KEYC_q] = "KEYC_q",
+    [KEYC_r] = "KEYC_r",
+    [KEYC_s] = "KEYC_s",
+    [KEYC_t] = "KEYC_t",
+    [KEYC_u] = "KEYC_u",
+    [KEYC_v] = "KEYC_v",
+    [KEYC_w] = "KEYC_w",
+    [KEYC_x] = "KEYC_x",
+    [KEYC_y] = "KEYC_y",
+    [KEYC_z] = "KEYC_z",
     [KEYC_LBRACE] = "KEYC_LBRACE",
     [KEYC_PIPE] = "KEYC_PIPE",
     [KEYC_RBRACE] = "KEYC_RBRACE",
@@ -102,10 +120,8 @@ static const char* key_names[KEYC_MAX] = {
     [KEYC_SHIFT] = "KEYC_SHIFT",
     [KEYC_ALT] = "KEYC_ALT",
     [KEYC_ALTGR] = "KEYC_ALTGR",
-
     [KEYC_BACKSPACE] = "KEYC_BACKSPACE",
     [KEYC_PRINT] = "KEYC_PRINT",
-
     [KEYC_F1] = "KEYC_F1",
     [KEYC_F2] = "KEYC_F2",
     [KEYC_F3] = "KEYC_F3",
@@ -118,12 +134,10 @@ static const char* key_names[KEYC_MAX] = {
     [KEYC_F10] = "KEYC_F10",
     [KEYC_F11] = "KEYC_F11",
     [KEYC_F12] = "KEYC_F12",
-
     [KEYC_LEFT] = "KEYC_LEFT",
     [KEYC_RIGHT] = "KEYC_RIGHT",
     [KEYC_UP] = "KEYC_UP",
     [KEYC_DOWN] = "KEYC_DOWN",
-
     [KEYC_SUPPR] = "KEYC_SUPPR",
     [KEYC_INSER] = "KEYC_INSER",
     [KEYC_BEGIN] = "KEYC_BEGIN",
@@ -131,19 +145,17 @@ static const char* key_names[KEYC_MAX] = {
     [KEYC_PAGE_DOWN] = "KEYC_PAGE_DOWN",
     [KEYC_END] = "KEYC_END",
     [KEYC_PAUSE] = "KEYC_PAUSE",
-
     [KEYC_LWINDOW] = "KEYC_LWINDOW",
     [KEYC_RWINDOW] = "KEYC_RWINDOW",
     [KEYC_CAPSLOCK] = "KEYC_CAPSLOCK",
     [KEYC_NUMLOCK] = "KEYC_NUMLOCK",
-
+    [KEYC_HOLD] = "KEYC_HOLD",
     [KEYC_ACUTE] = "KEYC_ACUTE",
     [KEYC_DIERE] = "KEYC_DIERE",
     [KEYC_CEDIL] = "KEYC_CEDIL",
-
-    [KEYC_HOLD] = "KEYC_HOLD",
 };
 #endif
+// --------------------------------------------------------------------
 
 
 typedef struct keyboard {
@@ -152,6 +164,7 @@ typedef struct keyboard {
 
     int init_kmode;
     struct termios init_termcfg;
+    struct kbd_repeat init_krepeat;
 } keyboard_t;
 
 
@@ -166,9 +179,28 @@ int init_keyboard() {
     }
 
     _KB.fd = STDIN_FILENO;
-    tcgetattr(_KB.fd, &_KB.init_termcfg);
-    ioctl(_KB.fd, KDGKBMODE, &_KB.init_kmode);
 
+    // Retrieve initial values
+    ioctl(_KB.fd, KDGKBMODE, &_KB.init_kmode);
+    _KB.init_krepeat = (struct kbd_repeat){
+        .delay = 0,
+        .period = 0
+    };
+    ioctl(_KB.fd, KDKBDREP, &_KB.init_krepeat);
+    tcgetattr(_KB.fd, &_KB.init_termcfg);
+
+    // Set keyboard mode
+    ioctl(_KB.fd, KDSKBMODE, K_MEDIUMRAW);
+
+    // Set keyboard delay
+    struct kbd_repeat new_repeat = {
+        .delay = 1,
+        .period = 1
+    };
+    ioctl(_KB.fd, KDKBDREP, &new_repeat);
+
+    // Set terminal mode
+    tcgetattr(_KB.fd, &_KB.init_termcfg);
     struct termios ts = _KB.init_termcfg;
     ts.c_cc[VTIME] = 0;     // Read timeout
     ts.c_cc[VMIN] = 0;      // Non-blocking read, if nothing to read,
@@ -179,7 +211,6 @@ int init_keyboard() {
     ts.c_iflag = 0;
     ts.c_cflag = CS8;
     tcsetattr(_KB.fd, TCSAFLUSH, &ts);
-    ioctl(_KB.fd, KDSKBMODE, K_MEDIUMRAW);
 
     memset(_KB.keys, 0, KEYC_MAX * sizeof(keyc_t));
 
@@ -192,6 +223,7 @@ void stop_keyboard() {
         return;
     }
     ioctl(_KB.fd, KDSKBMODE, _KB.init_kmode);
+    ioctl(_KB.fd, KDKBDREP, &_KB.init_krepeat);
     tcsetattr(_KB.fd, TCSAFLUSH, &_KB.init_termcfg);
     _KB.fd = -1;
 }
@@ -244,10 +276,6 @@ static keyc_t _convert_raw_key(int table, unsigned char raw_key) {
             index = KEYC_PRINT;
         } else {
             index = val;
-            // Special case, we don't handle uppercase characters
-            if (isupper(index)) {
-                index = tolower(index);
-            }
         }
         break;
 
@@ -265,7 +293,7 @@ static keyc_t _convert_raw_key(int table, unsigned char raw_key) {
       case KT_SPEC:
         switch (val) {
             MAPPING(KVAL(K_ENTER), KEYC_ENTER)
-            MAPPING(K_CAPS, KEYC_CAPSLOCK)
+            MAPPING(KVAL(K_CAPS), KEYC_CAPSLOCK)
             MAPPING(K_NUM, KEYC_NUMLOCK)
             MAPPING(0x10, KEYC_LWINDOW)
             MAPPING(0x11, KEYC_RWINDOW)

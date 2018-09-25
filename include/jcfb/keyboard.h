@@ -39,33 +39,38 @@ void update_keyboard();
 bool is_key_pressed(keyc_t key);
 
 
+/*
+ * Check if shift is pressed.
+ */
+bool is_shift_pressed(keyc_t key);
+
+
 // JCFB keycodes ------------------------------------------------------
 enum keyc {
     KEYC_UNKNOWN = -1,
 
     KEYC_TAB = 9,
     KEYC_ENTER = 10,
-
     KEYC_ESC = 27,
 
+    /* Printable characters, mapped on the ASCII table */
     KEYC_SPACE = 32,
-    KEYC_BANG = 33,
-    KEYC_QUOTE = 34,
-    KEYC_SHARP = 35,
-    KEYC_DOLLAR = 36,
-    KEYC_PERCENT = 37,
-    KEYC_AND = 38,
-    KEYC_SINGLE_QUOTE = 39,
-    KEYC_LPARENTHESIS = 40,
-    KEYC_RPARENTHESIS = 41,
-    KEYC_STAR = 42,
-    KEYC_PLUS = 43,
-    KEYC_COMMA = 44,
-    KEYC_DASH = 45,
-    KEYC_DOT = 46,
-    KEYC_SLASH = 47,
-
-    KEYC_0 = 48,
+    KEYC_BANG,
+    KEYC_QUOTE,
+    KEYC_SHARP,
+    KEYC_DOLLAR,
+    KEYC_PERCENT,
+    KEYC_AND,
+    KEYC_SINGLE_QUOTE,
+    KEYC_LPARENTHESIS,
+    KEYC_RPARENTHESIS,
+    KEYC_STAR,
+    KEYC_PLUS,
+    KEYC_COMMA,
+    KEYC_DASH,
+    KEYC_DOT,
+    KEYC_SLASH,
+    KEYC_0,
     KEYC_1,
     KEYC_2,
     KEYC_3,
@@ -75,23 +80,14 @@ enum keyc {
     KEYC_7,
     KEYC_8,
     KEYC_9,
-
-    KEYC_DOUBLE_DOT = 58,
-    KEYC_SEMICOLON = 59,
-    KEYC_LT = 60,
-    KEYC_EQUAL = 61,
-    KEYC_GT = 62,
-    KEYC_QUESTION_MARK = 63,
-    KEYC_AT = 64,
-
-    KEYC_LBRACKET = 91,
-    KEYC_BACKSLASH = 92,
-    KEYC_RBRACKET = 93,
-    KEYC_CIRCUMFLEX = 94,
-    KEYC_UNDERSCORE = 95,
-    KEYC_GRAVE_ACCENT = 96,
-
-    KEYC_A = 97,
+    KEYC_DOUBLE_DOT,
+    KEYC_SEMICOLON,
+    KEYC_LT,
+    KEYC_EQUAL,
+    KEYC_GT,
+    KEYC_QUESTION_MARK,
+    KEYC_AT,
+    KEYC_A,
     KEYC_B,
     KEYC_C,
     KEYC_D,
@@ -117,7 +113,38 @@ enum keyc {
     KEYC_X,
     KEYC_Y,
     KEYC_Z,
-
+    KEYC_LBRACKET,
+    KEYC_BACKSLASH,
+    KEYC_RBRACKET,
+    KEYC_CIRCUMFLEX,
+    KEYC_UNDERSCORE,
+    KEYC_GRAVE_ACCENT,
+    KEYC_a,
+    KEYC_b,
+    KEYC_c,
+    KEYC_d,
+    KEYC_e,
+    KEYC_f,
+    KEYC_g,
+    KEYC_h,
+    KEYC_i,
+    KEYC_j,
+    KEYC_k,
+    KEYC_l,
+    KEYC_m,
+    KEYC_n,
+    KEYC_o,
+    KEYC_p,
+    KEYC_q,
+    KEYC_r,
+    KEYC_s,
+    KEYC_t,
+    KEYC_u,
+    KEYC_v,
+    KEYC_w,
+    KEYC_x,
+    KEYC_y,
+    KEYC_z,
     KEYC_LBRACE,
     KEYC_PIPE,
     KEYC_RBRACE,
@@ -128,10 +155,8 @@ enum keyc {
     KEYC_SHIFT,
     KEYC_ALT,
     KEYC_ALTGR,
-
     KEYC_BACKSPACE,
     KEYC_PRINT,
-
     KEYC_F1,
     KEYC_F2,
     KEYC_F3,
@@ -144,12 +169,10 @@ enum keyc {
     KEYC_F10,
     KEYC_F11,
     KEYC_F12,
-
     KEYC_LEFT,
     KEYC_RIGHT,
     KEYC_UP,
     KEYC_DOWN,
-
     KEYC_SUPPR,
     KEYC_INSER,
     KEYC_BEGIN,
@@ -157,17 +180,15 @@ enum keyc {
     KEYC_PAGE_DOWN,
     KEYC_END,
     KEYC_PAUSE,
-
     KEYC_LWINDOW,
     KEYC_RWINDOW,
     KEYC_CAPSLOCK,
     KEYC_NUMLOCK,
+    KEYC_HOLD,
 
     KEYC_ACUTE,
     KEYC_DIERE,
     KEYC_CEDIL,
-
-    KEYC_HOLD,
 
     KEYC_MAX = 512
 };

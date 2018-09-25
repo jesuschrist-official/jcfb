@@ -55,7 +55,7 @@ $(JCFB): $(DOBJ)/pixel.o \
 	$(AR) rvs $@ $^
 
 
-samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE)
+samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE) $(KEYBOARD)
 
 
 $(PRINT): $(JCFB) $(DSAMPLE)/print.c
@@ -76,6 +76,10 @@ $(TTF): $(JCFB) $(DSAMPLE)/ttf.c
 
 $(MOVE): $(JCFB) $(DSAMPLE)/move.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
+
+
+$(KEYBOARD): $(JCFB) $(DSAMPLE)/keyboard.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@
 
 
 tests: $(DBUILD)/$(DTESTS)/pixel.test
