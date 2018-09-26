@@ -14,6 +14,7 @@
 #include "jcfb/primitive.h"
 #include "jcfb/ttf.h"
 #include "jcfb/keyboard.h"
+#include "jcfb/mouse.h"
 
 
 /*

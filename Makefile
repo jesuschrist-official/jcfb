@@ -16,7 +16,7 @@ DBENCH=benchmarks
 
 # C Compiler
 CC=gcc
-CFLAGS=-Wall -Werror -std=gnu99 -I$(DINC)
+CFLAGS=-Wall -Werror -std=gnu11 -I$(DINC)
 LDFLAGS=-lm
 ifeq ($(DEBUG),1)
 	CFLAGS+=-DDEBUG -g
@@ -34,6 +34,7 @@ MANDELBROT=$(DBUILD)/$(DSAMPLE)/mandelbrot.exe
 TETRIS=$(DBUILD)/$(DSAMPLE)/tetris.exe
 TTF=$(DBUILD)/$(DSAMPLE)/ttf.exe
 KEYBOARD=$(DBUILD)/$(DSAMPLE)/keyboard.exe
+MOUSE=$(DBUILD)/$(DSAMPLE)/mouse.exe
 MOVE=$(DBUILD)/$(DSAMPLE)/move.exe
 
 
@@ -51,11 +52,13 @@ $(JCFB): $(DOBJ)/pixel.o \
          $(DOBJ)/bitmap-io.o \
          $(DOBJ)/primitive.o \
          $(DOBJ)/ttf.o \
-         $(DOBJ)/keyboard.o
+         $(DOBJ)/keyboard.o \
+		 $(DOBJ)/mouse.o
 	$(AR) rvs $@ $^
 
 
-samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE) $(KEYBOARD)
+samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE) $(KEYBOARD) \
+		 $(MOUSE)
 
 
 $(PRINT): $(JCFB) $(DSAMPLE)/print.c
@@ -80,6 +83,10 @@ $(MOVE): $(JCFB) $(DSAMPLE)/move.c
 
 $(KEYBOARD): $(JCFB) $(DSAMPLE)/keyboard.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@
+
+
+$(MOUSE): $(JCFB) $(DSAMPLE)/mouse.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb
 
 
 tests: $(DBUILD)/$(DTESTS)/pixel.test
