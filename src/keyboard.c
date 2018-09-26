@@ -12,6 +12,9 @@
 #include "jcfb/keyboard.h"
 
 
+#define MAXEVTS 1024
+
+
 // Key names (debug) --------------------------------------------------
 #ifdef DEBUG
 static const char* key_names[KEYC_MAX] = {
@@ -165,18 +168,33 @@ typedef struct keyboard {
     int init_kmode;
     struct termios init_termcfg;
     struct kbd_repeat init_krepeat;
+
+    int evts_count;
+    keybevt_t evts[MAXEVTS];
 } keyboard_t;
 
 
 static keyboard_t _KB = {
     .fd = -1,
+    .evts_count = 0,
 };
+
+
+static int _push_evt(keybevt_t evt) {
+    if (_KB.evts_count == MAXEVTS) {
+        return -1;
+    }
+    _KB.evts[_KB.evts_count++] = evt;
+    return 0;
+}
 
 
 int init_keyboard() {
     if (_KB.fd >= 0) {
         return -1;
     }
+
+    _KB.evts_count = 0;
 
     _KB.fd = STDIN_FILENO;
 
@@ -294,7 +312,7 @@ static keyc_t _convert_raw_key(int table, unsigned char raw_key) {
         switch (val) {
             MAPPING(KVAL(K_ENTER), KEYC_ENTER)
             MAPPING(KVAL(K_CAPS), KEYC_CAPSLOCK)
-            MAPPING(K_NUM, KEYC_NUMLOCK)
+            MAPPING(KVAL(K_NUM), KEYC_NUMLOCK)
             MAPPING(0x10, KEYC_LWINDOW)
             MAPPING(0x11, KEYC_RWINDOW)
             MAPPING(KVAL(K_HOLD), KEYC_HOLD)
@@ -326,6 +344,8 @@ static keyc_t _convert_raw_key(int table, unsigned char raw_key) {
 
 
 void update_keyboard() {
+    _KB.evts_count = 0;
+
     unsigned char raw_key = 0;
     while (read(_KB.fd, &raw_key, 1) != 0) {
         bool pressed = !(raw_key & 0x80);
@@ -341,6 +361,25 @@ void update_keyboard() {
 #ifdef DEBUG
             printf("%s\n", key_names[key]);
 #endif
+            // Push event
+            keybevt_t evt = (keybevt_t){
+                .type = -1,
+                .keyc = key
+            };
+            bool prev_state = _KB.keys[key];
+            if (!prev_state && pressed) {
+                evt.type = KEYBEVT_PRESSED;
+            } else
+            if (prev_state && pressed) {
+                evt.type = KEYBEVT_HELD;
+            } else
+            if (prev_state && !pressed) {
+                evt.type = KEYBEVT_RELEASED;
+            }
+            if (evt.type != -1) {
+                _push_evt(evt);
+            }
+
             _KB.keys[key] = pressed;
         }
 #ifdef DEBUG
@@ -355,4 +394,13 @@ void update_keyboard() {
 bool is_key_pressed(keyc_t key) {
     assert(key >= 0 && key < KEYC_MAX);
     return _KB.keys[key];
+}
+
+
+int poll_keyboard(keybevt_t* evt) {
+    if (!_KB.evts_count) {
+        return 0;
+    }
+    *evt = _KB.evts[--_KB.evts_count];
+    return 1;
 }

@@ -194,6 +194,27 @@ enum keyc {
 };
 
 
+// Keyboard user interface --------------------------------------------
+typedef enum {
+    KEYBEVT_PRESSED,
+    KEYBEVT_HELD,
+    KEYBEVT_RELEASED,
+} keybevt_type_t;
+
+
+typedef struct keybevt {
+    keybevt_type_t type;
+    keyc_t keyc;
+} keybevt_t;
+
+
+/**
+ * Poll next keyboard event.
+ * Returns 0 if there is no more event to poll.
+ */
+int poll_keyboard(keybevt_t* evt);
+
+
 // --------------------------------------------------------------------
 
 

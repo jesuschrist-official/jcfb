@@ -56,6 +56,11 @@ void bitmap_wipe(bitmap_t* bmp) {
 }
 
 
+pixel_t* bitmap_pixel_addr(bitmap_t* bmp, int x, int y) {
+    return &bmp->mem[y * bmp->w + x];
+}
+
+
 size_t bitmap_memsize(const bitmap_t* bmp) {
     return bmp->w * bmp->h * sizeof(pixel_t);
 }
