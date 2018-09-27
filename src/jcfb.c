@@ -42,6 +42,7 @@ static fb_t _FB;
 
 static void (*_sigsegv_handler)(int) = NULL;
 static void (*_sigint_handler)(int) = NULL;
+static void (*_sigabrt_handler)(int) = NULL;
 
 
 static size_t _FB_memsize() {
@@ -73,6 +74,10 @@ static void _signal_handler(int signo) {
     if (signo == SIGINT) {
         signal(SIGINT, _sigint_handler);
         raise(SIGINT);
+    } else
+    if (signo == SIGABRT) {
+        signal(SIGABRT, _sigabrt_handler);
+        raise(SIGABRT);
     }
 }
 
@@ -158,7 +163,7 @@ int jcfb_start() {
     atexit(jcfb_stop);
     _sigsegv_handler = signal(SIGSEGV, _signal_handler);
     _sigint_handler = signal(SIGINT, _signal_handler);
-    // TODO Handling SIGABRT too for asserts in debug
+    _sigabrt_handler = signal(SIGABRT, _signal_handler);
 
     return 0;
 
