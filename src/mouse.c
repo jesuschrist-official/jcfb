@@ -99,11 +99,13 @@ static int _read_mouse() {
            frame.xsign, frame.ysign, frame.xoverf, frame.yoverf,
            frame.x, frame.y);
 #endif
-    _MS.dx = (frame.xsign) ? -(0xff - frame.x) : frame.x;
+    int dx = (frame.xsign) ? -(0xff - frame.x) : frame.x;
      // Inversed per default
-    _MS.dy = -(frame.ysign) ? -(0xff - frame.y) : frame.y;
-    _MS.x = max(0, min(MOUSE_MAX_RANGE, _MS.x + _MS.dx));
-    _MS.y = max(0, min(MOUSE_MAX_RANGE, _MS.y - _MS.dy));
+    int dy = -((frame.ysign) ? -(0xff - frame.y) : frame.y);
+    _MS.x = max(0, min(MOUSE_MAX_RANGE, _MS.x + dx));
+    _MS.y = max(0, min(MOUSE_MAX_RANGE, _MS.y + dy));
+    _MS.dx += dx;
+    _MS.dy += dy;
 
     // Fire event if needed.
     if (frame.left && !_MS.left) {
@@ -140,6 +142,9 @@ static int _update_mouse() {
     // This is a choice...
     _MS.evts_count = 0;
     _MS.poll_index = 0;
+
+    _MS.dx = 0;
+    _MS.dy = 0;
 
     do {
         FD_SET(_MS.fd, &fdset);
@@ -196,6 +201,16 @@ int mouse_x() {
 
 int mouse_y() {
     return _MS.y;
+}
+
+
+int mouse_x_speed() {
+    return _MS.dx;
+}
+
+
+int mouse_y_speed() {
+    return _MS.dy;
 }
 
 

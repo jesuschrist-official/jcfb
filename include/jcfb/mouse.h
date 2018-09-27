@@ -56,6 +56,18 @@ int mouse_y();
 
 
 /*
+ * Get mouse x-axis speed.
+ */
+int mouse_x_speed();
+
+
+/*
+ * Get mouse y-axis speed.
+ */
+int mouse_y_speed();
+
+
+/*
  * Mouse buttons.
  */
 typedef enum {
