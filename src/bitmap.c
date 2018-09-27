@@ -81,6 +81,11 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color) {
 }
 
 
+
+// In the following blit functions,
+// x, y are the coordinates requested by the user,
+// dx, dy are the current final coordinates on the `dst` bitmap and
+// sx, sy are the current final coordinates on the `src` bitmap.
 static void _blit_row(bitmap_t* dst, const bitmap_t* src,
                       int x, int dy, int sy)
 {
@@ -90,10 +95,8 @@ static void _blit_row(bitmap_t* dst, const bitmap_t* src,
     if (max_size < 0) {
         return;
     }
-
     pixel_t* dest_addr = dst->mem + dy * dst->w + dx;
     const pixel_t* src_addr = src->mem + sy * src->w + sx;
-
     memcpy(dest_addr, src_addr, max_size * sizeof(pixel_t));
 }
 
@@ -101,6 +104,8 @@ static void _blit_row(bitmap_t* dst, const bitmap_t* src,
 static void _fast_blit(bitmap_t* dst, const bitmap_t* src,
                        int x, int y)
 {
+    // If `y` is offscreen, we start to copy `src` from the `-y` row to
+    // `dst` on the first row.
     int dy = max(0, y);
     int sy = max(0, -y);
     for (; dy < dst->h && sy < src->h; dy++, sy++) {
@@ -189,15 +194,9 @@ static void _bitmap_masked_blit_row(bitmap_t* dst, const bitmap_t* src,
 void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
                         int x, int y)
 {
-    // If `y` is offscreen, we start to copy `src` from the `-y` row.
     int sy = max(0, -y);
     int dy = max(0, y);
     for (; dy < dst->h && sy < src->h; dy++, sy++) {
         _bitmap_masked_blit_row(dst, src, x, dy, sy);
     }
-}
-
-
-pixel_t* bitmap_pixel_addr(bitmap_t* bmp, int x, int y) {
-    return &bmp->mem[y * bmp->w + x];
 }

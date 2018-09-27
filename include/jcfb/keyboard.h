@@ -1,5 +1,16 @@
 /*
  * JCFB keyboard handling.
+ *
+ * There are two ways to access the keyboard state.
+ *
+ * If you need to know the state of a key at a given instant, use
+ * `is_key_pressed()` with the right key code (see `keyc_t` enum).
+ *
+ * Otherwise, if you want to know what the user has done between two
+ * frames, you should use the polling function `poll_keyboard` that
+ * will returns in the chronological order every events (key pressed,
+ * released, held) the keyboard registered between two calls to
+ * `keyboard_update()`.
  */
 #ifndef _jcfb_keyboard_h_
 #define _jcfb_keyboard_h_
@@ -194,7 +205,13 @@ enum keyc {
 };
 
 
-// Keyboard user interface --------------------------------------------
+// Polling interface --------------------------------------------------
+/*
+ * Keyboard event types.
+ * Pressed means the key has just been pressed,
+ * Released means the ke has just been released and
+ * Held means the key is pressed for more than one update.
+ */
 typedef enum {
     KEYBEVT_PRESSED,
     KEYBEVT_HELD,
@@ -202,13 +219,16 @@ typedef enum {
 } keybevt_type_t;
 
 
+/*
+ * Keyboard event.
+ */
 typedef struct keybevt {
     keybevt_type_t type;
     keyc_t keyc;
 } keybevt_t;
 
 
-/**
+/*
  * Poll next keyboard event.
  * Returns 0 if there is no more event to poll.
  */
@@ -216,6 +236,4 @@ int poll_keyboard(keybevt_t* evt);
 
 
 // --------------------------------------------------------------------
-
-
 #endif

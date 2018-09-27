@@ -22,7 +22,9 @@ int ttf_load(ttf_font_t* ttf, const char* path) {
     if (!ttf->buffer) {
         goto error;
     }
-    fread(ttf->buffer, 1, size, f);
+    if (fread(ttf->buffer, 1, size, f) < 0) {
+        goto error;
+    }
     if (!stbtt_InitFont(&ttf->font_info, ttf->buffer, 0)) {
         goto error;
     }
@@ -55,6 +57,8 @@ STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo *info,
     unsigned char* bitmap = stbtt_GetCodepointBitmap(
         &font->font_info, 0, scale, cp, &w, &h, 0, &off_y
     );
+    // TODO Corriger les overflows,
+    //      prendre en compte l'antialising
     for (int dy = 0; dy < h; dy++) {
         for (int dx = 0; dx < w; dx++) {
             if (!bitmap[dy * w + dx]) {

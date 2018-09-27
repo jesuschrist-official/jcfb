@@ -39,7 +39,8 @@ void jcfb_clear();
  * Get a bitmap of the dimension of the framebuffer, having its pixel
  * format.
  * Caller has the responsibility to free returned address and to wipe its
- * content using `bitmap_wipe`.
+ * content using `bitmap_wipe.
+ * XXX This is clumsy, correct that!
  */
 bitmap_t* jcfb_get_bitmap();
 
