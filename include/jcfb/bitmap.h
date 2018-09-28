@@ -82,21 +82,30 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color);
 
 
 /*
- * Blit the `src` bitmap at the given position of `dest` bitmap.
+ * Blit the `src` bitmap at the given position of `dst` bitmap.
  */
 void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y);
 
 
 /*
- * Blit the `src` bitmap at the given position of `dest` bitmap, scaled
- * to dimensions (dw, dh).
+ * Blit the `src` bitmap at the given position of `dst` bitmap, scaled
+ * to dimensions (w, h).
  */
 void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
                         int x, int y, int w, int h);
 
 
 /*
- * Blit the `src` bitmap at the given position of `dest` bitmap. Skip
+ * Blit the given region of the `src` bitmap to the given position of
+ * `dst` bitmap, scaled to dimensions (dw, dh).
+ */
+void bitmap_scaled_region_blit(bitmap_t* dst, const bitmap_t* src,
+                               int sx, int sy, int sw, int sh,
+                               int dx, int dy, int dw, int dh);
+
+
+/*
+ * Blit the `src` bitmap at the given position of `dst` bitmap. Skip
  * masked pixels.
  */
 void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,

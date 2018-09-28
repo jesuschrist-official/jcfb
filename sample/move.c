@@ -46,7 +46,10 @@ int main(int argc, char** argv) {
             player_x += 16;
         }
         bitmap_clear(&buffer, 0x00000000);
-        bitmap_masked_blit(&buffer, &player, player_x, player_y);
+        bitmap_scaled_region_blit(
+            &buffer, &player,
+            5, 0, 55, 56,
+            player_x, player_y, 32, 32);
         bitmap_scaled_blit(screen, &buffer, 0, 0,
                            screen->w, screen->h);
         jcfb_refresh(screen);

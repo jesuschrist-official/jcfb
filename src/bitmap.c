@@ -174,6 +174,49 @@ void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
 }
 
 
+static void _blit_scaled_region_row(bitmap_t* dst, const bitmap_t* src,
+                                    int dst_x, int dst_y, int dst_w,
+                                    int src_x, int src_y,
+                                    int src_w)
+{
+    int dx = max(0, dst_x);
+    int sx = max(0, -dst_x);
+
+    int dx_max = min(dst_x + dst_w, dst->w);
+    int sx_max = min(src_x + src_w, src->w);
+
+    float xratio = src_w / (float)dst_w;
+
+    for (; dx < dx_max && src_x + sx * xratio < sx_max; dx++, sx++) {
+        size_t dst_off = dst_y * dst->w + dx;
+        size_t src_off = (size_t)(src_y * src->w + src_x + sx * xratio);
+        dst->mem[dst_off] = src->mem[src_off];
+    }
+}
+
+
+void bitmap_scaled_region_blit(bitmap_t* dst, const bitmap_t* src,
+                               int src_x, int src_y, int src_w,
+                               int src_h,
+                               int dst_x, int dst_y, int dst_w,
+                               int dst_h)
+{
+    int dy = max(0, dst_y);
+    float sy = src_y + max(0, -dst_y);
+
+    int dy_max = min(dst_y + dst_h, dst->h);
+    float sy_max = min(src_y + src_h, src->h);
+
+    float yratio = src_h / (float)dst_h;
+
+    for (; dy < dy_max && sy * yratio < sy_max; dy++, sy++) {
+        _blit_scaled_region_row(dst, src,
+                                dst_x, dy, dst_w,
+                                src_x, sy * yratio, src_w);
+    }
+}
+
+
 static void _bitmap_masked_blit_row(bitmap_t* dst, const bitmap_t* src,
                                     int dx, int dy, int sy)
 {
