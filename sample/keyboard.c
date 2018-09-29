@@ -1,4 +1,4 @@
-#define DEBUG
+#define KEYB_DEBUG
 #include "../src/keyboard.c"
 
 

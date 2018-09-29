@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <fcntl.h>
 #include <sys/select.h>
@@ -84,16 +85,12 @@ static int _push_evt(mousebtn_t btn, bool released) {
 }
 
 
-static int _read_mouse() {
-    struct mouse_frame frame;
-    if (read(_MS.fd, &frame, sizeof(struct mouse_frame)) < 0) {
-        return -1;
-    }
+static int _handle_frame(struct mouse_frame frame) {
     if (!frame.always) {
         fprintf(stderr, "Read invalid mouse frame\n");
         return -1;
     }
-#ifdef DEBUG
+#ifdef MOUSE_DEBUG
     printf("MOUSE %x %x %x %x %x %x %x %x %x %x\n",
            frame.left, frame.right, frame.middle, frame.always,
            frame.xsign, frame.ysign, frame.xoverf, frame.yoverf,
@@ -135,10 +132,18 @@ static int _read_mouse() {
 }
 
 
-static int _update_mouse() {
+static bool _has_food() {
     fd_set fdset;
     struct timeval timeout;
 
+    FD_ZERO(&fdset);
+    FD_SET(_MS.fd, &fdset);
+    memset(&timeout, 0, sizeof(struct timeval));
+    return select(_MS.fd + 1, &fdset, NULL, NULL, &timeout) > 0;
+}
+
+
+static int _update_mouse() {
     // This is a choice...
     _MS.evts_count = 0;
     _MS.poll_index = 0;
@@ -146,16 +151,11 @@ static int _update_mouse() {
     _MS.dx = 0;
     _MS.dy = 0;
 
-    do {
-        FD_SET(_MS.fd, &fdset);
-        timeout = (struct timeval){0};
-        int ret = select(_MS.fd + 1, &fdset, NULL, NULL, &timeout);
-        if (ret > 0) {
-            _read_mouse();
-        } else {
-            break;
-        }
-    } while (1);
+    struct mouse_frame frame;
+    while (_has_food()) {
+        read(_MS.fd, &frame, sizeof(struct mouse_frame));
+        _handle_frame(frame);
+    }
 
     return 0;
 }

@@ -16,7 +16,7 @@
 
 
 // Key names (debug) --------------------------------------------------
-#ifdef DEBUG
+#ifdef KEYB_DEBUG
 static const char* key_names[KEYC_MAX] = {
     [KEYC_TAB] = "KEYC_TAB",
     [KEYC_ENTER] = "KEYC_ENTER",
@@ -263,7 +263,7 @@ static keyc_t _convert_raw_key(int table, unsigned char raw_key) {
 #define MAPPING(_K, _KC) \
     case _K: index = _KC;  break;
 
-#ifdef DEBUG
+#ifdef KEYB_DEBUG
     printf("KTYP=0x%x, KVAL=0x%x, kb_value=0x%x, raw_key=0x%x\n",
            type, val, entry.kb_value, raw_key & 0x7f);
 #endif
@@ -358,7 +358,7 @@ void update_keyboard() {
         }
         keyc_t key = _convert_raw_key(tab, raw_key);
         if (key != KEYC_UNKNOWN) {
-#ifdef DEBUG
+#ifdef KEYB_DEBUG
             printf("%s\n", key_names[key]);
 #endif
             // Push event
@@ -382,7 +382,7 @@ void update_keyboard() {
 
             _KB.keys[key] = pressed;
         }
-#ifdef DEBUG
+#ifdef KEYB_DEBUG
         else if (!(raw_key & 0x80)) {
             printf("KEYC_UNKNOWN\n");
         }

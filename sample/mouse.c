@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
                    evt.x, evt.y, evt.dx, evt.dy);
         }
 
-        usleep(1000000);
+        usleep(500000);
     }
 
     stop_mouse();
