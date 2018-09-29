@@ -15,6 +15,7 @@
 #include "jcfb/ttf.h"
 #include "jcfb/keyboard.h"
 #include "jcfb/mouse.h"
+#include "jcfb/util.h"
 
 
 /*
