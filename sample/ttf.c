@@ -35,6 +35,14 @@ int main(int argc, char** argv) {
                &buffer, 10, 24, 24,
                0x00cc5500);
 
+    int base_line;
+    float scale = stbtt_ScaleForPixelHeight(&font.font_info, 24);
+    stbtt_GetFontVMetrics(&font.font_info, &base_line, NULL, NULL);
+    base_line *= scale;
+    draw_hline(&buffer, 0x00ff0000, 0, buffer.w - 1, 24);
+    draw_hline(&buffer, 0x00ff0000, 0, buffer.w - 1, 24 + base_line);
+    draw_hline(&buffer, 0x00ff0000, 0, buffer.w - 1, 48);
+
     int exit = 0;
     while (!exit) {
         if (is_key_pressed(KEYC_ESC)) {

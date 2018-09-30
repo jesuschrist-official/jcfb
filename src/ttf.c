@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "jcfb/util.h"
 #include "jcfb/ttf.h"
 
 
@@ -22,7 +23,8 @@ int ttf_load(ttf_font_t* ttf, const char* path) {
     if (!ttf->buffer) {
         goto error;
     }
-    if (fread(ttf->buffer, 1, size, f) < 0) {
+    int res = fread(ttf->buffer, 1, size, f);
+    if (res < 0) {
         goto error;
     }
     if (!stbtt_InitFont(&ttf->font_info, ttf->buffer, 0)) {
@@ -45,28 +47,33 @@ void ttf_wipe(ttf_font_t* font) {
 
 
 void ttf_render_cp(const ttf_font_t* font, int cp, bitmap_t* bmp,
-                   int x, int y, int height, pixel_t color)
+                   int x, int y, int h, pixel_t color)
 {
-#if 0
-STBTT_DEF void stbtt_GetFontVMetrics(const stbtt_fontinfo *info,
-                                     int *ascent, int *descent,
-                                     int *lineGap);
-#endif
-    float scale = stbtt_ScaleForPixelHeight(&font->font_info, height);
-    int w, h, off_y;
+    float scale = stbtt_ScaleForPixelHeight(&font->font_info, h);
+    int sw, sh, off_y;
     unsigned char* bitmap = stbtt_GetCodepointBitmap(
-        &font->font_info, 0, scale, cp, &w, &h, 0, &off_y
+        &font->font_info, 0, scale, cp, &sw, &sh, 0, &off_y
     );
-    // TODO Corriger les overflows,
-    //      prendre en compte l'antialising
-    for (int dy = 0; dy < h; dy++) {
-        for (int dx = 0; dx < w; dx++) {
-            if (!bitmap[dy * w + dx]) {
+
+    int base_line;
+    stbtt_GetFontVMetrics(&font->font_info, &base_line, NULL, NULL);
+    base_line *= scale;
+
+    // TODO handle dy < 0 & sy < 0 too
+    int diff = base_line + off_y;
+    int dy = min(y + diff, bmp->h - 1);
+    int sy = 0;
+    for (; dy < bmp->h && sy < sh; dy++, sy++) {
+        int dx = min(x, bmp->w - 1);
+        int sx = 0;
+        for (; dx < bmp->w && sx < sw; dx++, sx++) {
+            if (!bitmap[sy * sw + sx]) {
                 continue;
             }
-            bitmap_put_pixel(bmp, x + dx, y + dy + off_y, color);
+            bitmap_put_pixel(bmp, dx, dy, color);
         }
     }
+
     free(bitmap);
 }
 
