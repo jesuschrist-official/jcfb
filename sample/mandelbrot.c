@@ -156,7 +156,8 @@ int main(int argc, char** argv) {
     }
 
     srand(time(NULL));
-    bitmap_t* buffer = jcfb_get_bitmap();
+    bitmap_t buffer;
+    jcfb_get_bitmap(&buffer);
 
     int width = jcfb_width();
     int height = jcfb_height();
@@ -164,7 +165,7 @@ int main(int argc, char** argv) {
 
     int nit = 1 + rand() % 100;
     generate(width, height, iterations, nit);
-    draw(buffer, iterations, nit);
+    draw(&buffer, iterations, nit);
 
     int exit = 0;
     while (!exit) {
@@ -174,14 +175,13 @@ int main(int argc, char** argv) {
         if (is_key_pressed(KEYC_ENTER)) {
             nit = 1 + rand() % 100;
             generate(width, height, iterations, nit);
-            draw(buffer, iterations, nit);
+            draw(&buffer, iterations, nit);
         }
-        jcfb_refresh(buffer);
+        jcfb_refresh(&buffer);
         usleep(1E6 / 30);
     }
 
-    bitmap_wipe(buffer);
-    free(buffer);
+    bitmap_wipe(&buffer);
     jcfb_stop();
     return 0;
 }

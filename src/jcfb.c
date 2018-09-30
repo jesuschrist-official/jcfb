@@ -192,10 +192,8 @@ void jcfb_clear() {
 }
 
 
-bitmap_t* jcfb_get_bitmap() {
-    bitmap_t* bmp = malloc(sizeof(bitmap_t));
-    bitmap_init(bmp, _FB.var_si.xres, _FB.var_si.yres);
-    return bmp;
+int jcfb_get_bitmap(bitmap_t* bmp) {
+    return bitmap_init(bmp, _FB.var_si.xres, _FB.var_si.yres);
 }
 
 

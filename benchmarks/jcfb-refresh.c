@@ -11,18 +11,18 @@ int main(void) {
         return -1;
     }
 
-    bitmap_t* buffer = jcfb_get_bitmap();
-    bitmap_clear(buffer, 0x005555EE);
+    bitmap_t buffer;
+    jcfb_get_bitmap(&buffer);
+    bitmap_clear(&buffer, 0x005555EE);
 
     struct timeval start, stop;
     gettimeofday(&start, NULL);
     for (volatile size_t i = 0; i < NITERATIONS; i++) {
-        jcfb_refresh(buffer);
+        jcfb_refresh(&buffer);
     }
     gettimeofday(&stop, NULL);
 
-    bitmap_wipe(buffer);
-    free(buffer);
+    bitmap_wipe(&buffer);
     jcfb_stop();
 
     float elapsed = (stop.tv_sec + stop.tv_usec * 1E-6)

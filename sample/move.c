@@ -15,8 +15,9 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    bitmap_t* screen = jcfb_get_bitmap();
-    bitmap_clear(screen, 0x00000000);
+    bitmap_t screen;
+    jcfb_get_bitmap(&screen);
+    bitmap_clear(&screen, 0x00000000);
 
     bitmap_t buffer;
     bitmap_init(&buffer, 640, 400);
@@ -50,16 +51,15 @@ int main(int argc, char** argv) {
             &buffer, &player,
             5, 0, 55, 56,
             player_x, player_y, 32, 32);
-        bitmap_scaled_blit(screen, &buffer, 0, 0,
-                           screen->w, screen->h);
-        jcfb_refresh(screen);
+        bitmap_scaled_blit(&screen, &buffer, 0, 0,
+                           screen.w, screen.h);
+        jcfb_refresh(&screen);
         usleep(1000);
     }
 
     bitmap_wipe(&player);
     bitmap_wipe(&buffer);
-    bitmap_wipe(screen);
-    free(screen);
+    bitmap_wipe(&screen);
 
     jcfb_stop();
     printf("Gentle quit\n");

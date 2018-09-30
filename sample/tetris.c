@@ -427,9 +427,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    bitmap_t* buffer = jcfb_get_bitmap();
+    bitmap_t buffer;
+    jcfb_get_bitmap(&buffer);
     bitmap_t board;
-    bitmap_init(&board, buffer->h / 2, buffer->h - 1);
+    bitmap_init(&board, buffer.h / 2, buffer.h - 1);
 
     ttf_font_t font;
     if (ttf_load(&font, "data/Hermit-light.otf") < 0) {
@@ -456,38 +457,37 @@ int main(int argc, char** argv) {
         }
         loop_game();
 
-        bitmap_clear(buffer, 0x00000000);
-        draw_vline(buffer, pixel(0x00ffffff),
-                   buffer->w / 2 - board.w / 2 - 1,
-                   0, buffer->h);
-        draw_vline(buffer, pixel(0x00ffffff),
-                   buffer->w / 2 + board.w / 2 + 1,
-                   0, buffer->h);
-        draw_hline(buffer, pixel(0x00ffffff),
-                   buffer->w / 2 - board.w / 2,
-                   buffer->w / 2 + board.w / 2 + 1,
-                   buffer->h - 1);
+        bitmap_clear(&buffer, 0x00000000);
+        draw_vline(&buffer, pixel(0x00ffffff),
+                   buffer.w / 2 - board.w / 2 - 1,
+                   0, buffer.h);
+        draw_vline(&buffer, pixel(0x00ffffff),
+                   buffer.w / 2 + board.w / 2 + 1,
+                   0, buffer.h);
+        draw_hline(&buffer, pixel(0x00ffffff),
+                   buffer.w / 2 - board.w / 2,
+                   buffer.w / 2 + board.w / 2 + 1,
+                   buffer.h - 1);
 
         draw_game(&board);
-        bitmap_blit(buffer, &board, buffer->w / 2 - board.w / 2, 0);
+        bitmap_blit(&buffer, &board, buffer.w / 2 - board.w / 2, 0);
 
         char str_buffer[256];
         sprintf(str_buffer, "Level %d", _G.level);
-        ttf_render(&font, str_buffer, buffer,
-                   buffer->w / 2 + board.w / 2 + 10,
+        ttf_render(&font, str_buffer, &buffer,
+                   buffer.w / 2 + board.w / 2 + 10,
                    24, 24, 0x0055cc22);
         sprintf(str_buffer, "Score %d", _G.score);
-        ttf_render(&font, str_buffer, buffer,
-                   buffer->w / 2 + board.w / 2 + 10,
+        ttf_render(&font, str_buffer, &buffer,
+                   buffer.w / 2 + board.w / 2 + 10,
                    48, 24, 0x00cc5500);
 
-        jcfb_refresh(buffer);
+        jcfb_refresh(&buffer);
         usleep(1E6 / 30);
     }
 
     bitmap_wipe(&board);
-    bitmap_wipe(buffer);
-    free(buffer);
+    bitmap_wipe(&buffer);
     ttf_wipe(&font);
     jcfb_stop();
 
