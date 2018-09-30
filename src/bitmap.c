@@ -202,17 +202,17 @@ void bitmap_scaled_region_blit(bitmap_t* dst, const bitmap_t* src,
                                int dst_h)
 {
     int dy = max(0, dst_y);
-    float sy = src_y + max(0, -dst_y);
+    float sy = max(0, -dst_y);
 
     int dy_max = min(dst_y + dst_h, dst->h);
     float sy_max = min(src_y + src_h, src->h);
 
     float yratio = src_h / (float)dst_h;
 
-    for (; dy < dy_max && sy * yratio < sy_max; dy++, sy++) {
+    for (; dy < dy_max && src_y + sy * yratio < sy_max; dy++, sy++) {
         _blit_scaled_region_row(dst, src,
                                 dst_x, dy, dst_w,
-                                src_x, sy * yratio, src_w);
+                                src_x, src_y + sy * yratio, src_w);
     }
 }
 
