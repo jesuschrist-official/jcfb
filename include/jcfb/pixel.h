@@ -93,4 +93,10 @@ pixel_t pixel_to(pixfmt_id_t fmt, pixel_t rgba32);
 pixel_t pixel_conv(pixfmt_id_t in_fmt, pixfmt_id_t out_fmt, pixel_t p);
 
 
+/*
+ * Create a pixel in the framebuffer format using the RGB components.
+ */
+pixel_t rgb(int r, int g, int b);
+
+
 #endif

@@ -114,6 +114,11 @@ pixel_t pixel_conv(pixfmt_id_t in_fmt_id, pixfmt_id_t out_fmt_id,
 }
 
 
+pixel_t rgb(int r, int g, int b) {
+    return pixel((r << 0) | (g << 8) | (b << 16));
+}
+
+
 #ifdef TEST
 
 int main(void) {
@@ -156,5 +161,6 @@ int main(void) {
 
     return 0;
 }
+
 
 #endif
