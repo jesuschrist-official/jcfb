@@ -18,6 +18,8 @@
 // Key names (debug) --------------------------------------------------
 #ifdef KEYB_DEBUG
 static const char* key_names[KEYC_MAX] = {
+    [0] = "KEYC_???",
+
     [KEYC_TAB] = "KEYC_TAB",
     [KEYC_ENTER] = "KEYC_ENTER",
     [KEYC_ESC] = "KEYC_ESC",
@@ -163,13 +165,17 @@ static const char* key_names[KEYC_MAX] = {
 
 typedef struct keyboard {
     int fd;
-    keyc_t keys[KEYC_MAX];
+
+    int rawkeys[0x80];
+    keyc_t mappedkeys[0x80];
+    int keys[KEYC_MAX];
 
     int init_kmode;
     struct termios init_termcfg;
     struct kbd_repeat init_krepeat;
 
     int evts_count;
+    int poll_counter;
     keybevt_t evts[MAXEVTS];
 } keyboard_t;
 
@@ -180,8 +186,16 @@ static keyboard_t _KB = {
 };
 
 
-static int _push_evt(keybevt_t evt) {
+static int _push_evt(keybevt_type_t type, int raw_key) {
+    keybevt_t evt = {
+        .type = type,
+        .keyc = _KB.mappedkeys[raw_key]
+    };
+
     if (_KB.evts_count == MAXEVTS) {
+#ifdef KEYB_DEBUG
+        printf("Keyboard event queue is full\n");
+#endif
         return -1;
     }
     _KB.evts[_KB.evts_count++] = evt;
@@ -195,6 +209,7 @@ int init_keyboard() {
     }
 
     _KB.evts_count = 0;
+    _KB.poll_counter = 0;
 
     _KB.fd = STDIN_FILENO;
 
@@ -230,7 +245,7 @@ int init_keyboard() {
     ts.c_cflag = CS8;
     tcsetattr(_KB.fd, TCSAFLUSH, &ts);
 
-    memset(_KB.keys, 0, KEYC_MAX * sizeof(keyc_t));
+    memset(_KB.rawkeys, 0, 0x80 * sizeof(int));
 
     return 0;
 }
@@ -252,7 +267,7 @@ void stop_keyboard() {
 static keyc_t _convert_raw_key(int table, unsigned char raw_key) {
     keyc_t index = KEYC_UNKNOWN;
     struct kbentry entry;
-    int val, type ;
+    int val, type;
 
     entry.kb_table = table;
     entry.kb_index = raw_key & 0x7f;
@@ -344,11 +359,26 @@ static keyc_t _convert_raw_key(int table, unsigned char raw_key) {
 
 
 void update_keyboard() {
-    _KB.evts_count = 0;
+    _KB.evts_count = 0; // XXX Should do a rotation of the event queue
+                        //     instead.
+    _KB.poll_counter = 0;
+
+    int prevkeys[0x80];
+    memcpy(prevkeys, _KB.rawkeys, sizeof(prevkeys));
+
+    // We need to conserve a mask of every keys updated by the
+    // read loop below.
+    // Some events could not be notified in case of multiple keys
+    // being pressed simultaneously.
+    bool mask[0x80] = {0};
 
     unsigned char raw_key = 0;
     while (read(_KB.fd, &raw_key, 1) != 0) {
         bool pressed = !(raw_key & 0x80);
+        raw_key &= 0x7f;
+
+        // Select right key mapping table and convert raw key to
+        // JCFB key code.
         int tab = K_NORMTAB;
         if (_KB.keys[KEYC_SHIFT]) {
             tab = K_SHIFTTAB;
@@ -357,36 +387,65 @@ void update_keyboard() {
             tab = K_ALTTAB;
         }
         keyc_t key = _convert_raw_key(tab, raw_key);
-        if (key != KEYC_UNKNOWN) {
+        if (key == KEYC_UNKNOWN) {
 #ifdef KEYB_DEBUG
-            printf("%s\n", key_names[key]);
-#endif
-            // Push event
-            keybevt_t evt = (keybevt_t){
-                .type = -1,
-                .keyc = key
-            };
-            bool prev_state = _KB.keys[key];
-            if (!prev_state && pressed) {
-                evt.type = KEYBEVT_PRESSED;
-            } else
-            if (prev_state && pressed) {
-                evt.type = KEYBEVT_HELD;
-            } else
-            if (prev_state && !pressed) {
-                evt.type = KEYBEVT_RELEASED;
-            }
-            if (evt.type != -1) {
-                _push_evt(evt);
-            }
-
-            _KB.keys[key] = pressed;
-        }
-#ifdef KEYB_DEBUG
-        else if (!(raw_key & 0x80)) {
             printf("KEYC_UNKNOWN\n");
-        }
 #endif
+            continue;
+        }
+
+        // Special case with table modifier keys (SHIFT & ALTGR). We
+        // need to update the current mapping of currently pressed
+        // keys.
+        tab = (pressed && key == KEYC_SHIFT) ? K_SHIFTTAB
+            : (pressed && key == KEYC_ALTGR) ? K_ALTTAB
+            : K_NORMTAB;
+        if (key == KEYC_SHIFT || key == KEYC_ALTGR) {
+            for (size_t i = 0; i < 0x80; i++) {
+                if (_KB.rawkeys[i]) {
+                    keyc_t new_key = _convert_raw_key(tab, i);
+                    _KB.keys[_KB.mappedkeys[i]] = 0;
+                    _KB.mappedkeys[i] = new_key;
+                    _KB.keys[new_key] = 1;
+                }
+            }
+        }
+
+        // If the key is newly pressed, we store the mapped key it
+        // fired. This key code will be kept all the key-press life
+        // frame.
+        if (pressed && !prevkeys[raw_key]) {
+            _KB.rawkeys[raw_key] = 1;
+            _KB.keys[key] = 1;
+            _KB.mappedkeys[raw_key] = key;
+            _push_evt(KEYBEVT_PRESSED, raw_key);
+            mask[raw_key] = 1;
+        } else
+        if (pressed && prevkeys[raw_key]) {
+            _push_evt(KEYBEVT_HELD, raw_key);
+            mask[raw_key] = 1;
+        } else
+        if (!pressed && prevkeys[raw_key]) {
+            _push_evt(KEYBEVT_RELEASED, raw_key);
+            _KB.rawkeys[raw_key] = 0;
+            _KB.keys[_KB.mappedkeys[raw_key]] = 0;
+            mask[raw_key] = 1;
+        }
+
+        // In case we encounter more than once some key event, we
+        // need to actualise the previous state.
+        prevkeys[raw_key] = _KB.rawkeys[raw_key];
+
+#ifdef KEYB_DEBUG
+        printf("%s\n", key_names[key]);
+#endif
+    }
+
+    // Detect held keys that has not been fired.
+    for (size_t raw_key = 0; raw_key < 0x80; raw_key++) {
+        if (!mask[raw_key] && _KB.rawkeys[raw_key]) {
+            _push_evt(KEYBEVT_HELD, raw_key);
+        }
     }
 }
 
@@ -398,9 +457,9 @@ bool is_key_pressed(keyc_t key) {
 
 
 int poll_keyboard(keybevt_t* evt) {
-    if (!_KB.evts_count) {
+    if (_KB.poll_counter == _KB.evts_count) {
         return 0;
     }
-    *evt = _KB.evts[--_KB.evts_count];
+    *evt = _KB.evts[_KB.poll_counter++];
     return 1;
 }

@@ -25,7 +25,7 @@ int main(void) {
         if (is_key_pressed(KEYC_ESC)) {
             exit = 1;
         }
-        usleep(1000);
+        usleep(100000);
     }
     stop_keyboard();
 
