@@ -26,14 +26,15 @@ typedef enum keyc keyc_t;
 
 
 /*
- * Set terminal mode & configuration.
+ * Set terminal mode & configuration for something like an "immediate"
+ * mode.
  * Returns negative value on failure.
  */
 int init_keyboard();
 
 
 /*
- * Restore previous terminal state.
+ * Restore initial terminal state.
  */
 void stop_keyboard();
 

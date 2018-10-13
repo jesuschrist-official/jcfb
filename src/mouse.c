@@ -153,7 +153,9 @@ static int _update_mouse() {
 
     struct mouse_frame frame;
     while (_has_food()) {
-        read(_MS.fd, &frame, sizeof(struct mouse_frame));
+        if (read(_MS.fd, &frame, sizeof(struct mouse_frame)) != sizeof(struct mouse_frame)) {
+            return -1;
+        }
         _handle_frame(frame);
     }
 

@@ -1,3 +1,11 @@
+/*
+ * JCFB bitmap implementations
+ *
+ * XXX Maybe we could use an additional member `stride` to `bitmap_t`,
+ *     indicating the number of pixels between two rows.
+ *     This could be used to do regions of bitmaps without memory copy,
+ *     allowing for exemple to do clipping.
+ */
 #include <string.h>
 
 

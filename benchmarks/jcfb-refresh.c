@@ -3,7 +3,7 @@
 
 #include "jcfb/jcfb.h"
 
-#define NITERATIONS 100
+#define NITERATIONS 1000
 
 int main(void) {
     if (jcfb_start() < 0) {
@@ -27,9 +27,8 @@ int main(void) {
 
     float elapsed = (stop.tv_sec + stop.tv_usec * 1E-6)
                   - (start.tv_sec + start.tv_usec * 1E-6);
-    fprintf(stderr, "Rate: %.2f refresh/s\n", NITERATIONS * (1.0 / elapsed));
-
-
+    printf("Rate: %.2f refresh/s\n",
+           NITERATIONS * (1.0 / elapsed));
 
     return 0;
 }

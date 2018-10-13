@@ -37,16 +37,18 @@ void jcfb_clear();
 
 
 /*
- * Get a bitmap of the dimension of the framebuffer, having its pixel
- * format.
- * Caller has the responsibility to wipe hte returned bitmap.
+ * Initialize `bitmap` as a bitmap of the framebuffer dimensions &
+ * pixel format.
+ * Caller has the responsibility to wipe the initialized bitmap.
  */
 int jcfb_get_bitmap(bitmap_t* bitmap);
 
 
 /*
- * Refresh the screen with the given bitmap.
- * Update keyboard status.
+ * Refresh the screen with the given bitmap. This bitmap need to have
+ * the framebuffer dimensions and pxiel format. Use `jcfb_get_bitmap()`
+ * to retrieve such bitmap.
+ * Update keyboard & mouse state.
  */
 void jcfb_refresh(bitmap_t* bmp);
 

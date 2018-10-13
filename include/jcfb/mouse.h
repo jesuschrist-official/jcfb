@@ -1,15 +1,18 @@
 /*
  * JCFB mouse module.
  *
+ * Once the mouse has been initialized with `init_mouse()`, a direct
+ * and a polling interface can be used to query mouse state.
+ *
  * The mouse coordinates always range in [0, MOUSE_MAX_RANGE[.
  *
  * To query at a given time the mouse position, use `mouse_x()` and
  * `mouse_y()`.
  *
  * To know which buttons has been pressed, use the polling function
- * `poll_mouse` while there is something to poll. Every mouse events
- * occured between two calls of `mouse_update` will be reported in the
- * chronological order.
+ * `poll_mouse()` while there is something to poll. Every mouse events
+ * occured between two calls of `mouse_update()` will be reported in
+ * the chronological order.
  *
  * Every call to `update_mouse()` clear the previous events queue.
  * Every non-polled event will be lost.

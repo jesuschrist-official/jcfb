@@ -1,0 +1,35 @@
+RENDERING
+
+
+    COLOR CONVERSION
+
+Conversion between the user color (color requested by the user, for
+exemple in RGB32) and the framebuffer color (system color, for exemple
+RGB16) is a slow process.
+
+Execute benchmarks/bitmap-blit for cost on your computer. On mine,
+a blit with color conversion is 70x slower than one with none.
+
+To avoid time passed in conversion, we force the creation and loading
+of bitmaps in framebuffer pixel format. This will allow us to use
+optimized functions like memcpy to blit bitmaps.
+
+Once JCFB has been started with `jcfb_init()`, we store in memory in
+the pixel module its color format, and every calls to `bitmap_init()`
+will create a bitmap using the framebuffer color format. Using this
+policy, we mostly avoid any color conversion.
+
+Every function taking a pixel_t in input expect this pixel to be
+encoded with the global pixel format. Don't doing this conversion leads
+to an undefined behaviour (yes, yes, just wrong colors...).
+Conversion is done using the `pixel()` function when converting from
+ARGB32, or any of the conversion function provided in "jcfb/pixel.h".
+
+
+
+    BITMAP DATA
+
+Pixels are ever stored on 32 bits, even if the bitmap's color format
+is 16 bits. This allows to do easy addressing of pixels, and also ease
+memory alignment. Could be useful when optimising the code with
+intinsics.

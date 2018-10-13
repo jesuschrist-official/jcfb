@@ -57,8 +57,7 @@ static void _draw_frame(bitmap_t* bmp) {
     size_t bpp = _FB.var_si.bits_per_pixel / 8;
     pixel_t* src = bmp->mem;
     for (size_t i  = 0; i < bmp->w * bmp->h; i++) {
-        pixel_t res = pixel_conv(PIXFMT_FB, bmp->fmt, *src);
-        memcpy(dest, &res, bpp);
+        memcpy(dest, src, bpp);
         dest += bpp;
         src++;
     }

@@ -2,9 +2,9 @@
  * Bitmap module
  *
  * Load, create and manipulate bitmaps.
- * Many bitmaps functions assume JCFB has been started and framebuffer
- * pixel format has been set. Calling thus functions in such context is
- * an undefined behaviour.
+ *
+ * Every bliting function assumes given bitmaps have the same pixel
+ * format, minus `bitmap_blit()`.
  */
 #ifndef _jcfb_bitmap_h_
 #define _jcfb_bitmap_h_

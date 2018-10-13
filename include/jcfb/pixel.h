@@ -1,8 +1,20 @@
 /*
- * Pixel manipulation.
+ * Pixel manipulation
  *
  * This module provides tools to do color conversion between various
  * pixel formats.
+ *
+ * JCFB achieves color conversion in a generic way. This is cool, but
+ * it has a hudge conversion cost (on my computer in release mode,
+ * blitting a bitmap without color conversion is seventy times faster
+ * than with color conversion).
+ *
+ * To avoid the need to do many color conversions, every data created
+ * by JCFB will be encoded using the framebuffer internal pixel format.
+ *
+ * At any time in the code, and once JCFB has been started, using the
+ * `pixel()` function will convert a RGBA32 color to the framebuffer
+ * format.
  */
 #ifndef _jcfb_pixel_h_
 #define _jcfb_pixel_h_
@@ -49,7 +61,7 @@ typedef struct pixfmt {
     size_t bpp;               /* Bits per pixel */
     uint32_t offs[COMP_MAX];  /* Components offset */
     uint32_t sizes[COMP_MAX]; /* Components length */
-    // XXX Maybe we'll need Big/Little Endian information
+    // XXX Maybe we'll need Big/Little Endian information ?
 } pixfmt_t;
 
 
@@ -94,7 +106,8 @@ pixel_t pixel_conv(pixfmt_id_t in_fmt, pixfmt_id_t out_fmt, pixel_t p);
 
 
 /*
- * Create a pixel in the framebuffer format using the RGB components.
+ * Create a pixel in the framebuffer format using the given RGB
+ * components.
  */
 pixel_t rgb(int r, int g, int b);
 

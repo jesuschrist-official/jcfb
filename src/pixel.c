@@ -58,7 +58,8 @@ static uint32_t _comp_conv_32(uint32_t off, uint32_t size,
 }
 
 
-pixel_t pixel(pixel_t rgba32) {
+pixel_t pixel(pixel_t rgba32)
+{
     static const pixfmt_t* fmt = &_PIXFMTS[PIXFMT_FB];
     return _comp_conv_32(fmt->offs[0], fmt->sizes[0],
                          ((rgba32 >> 0 ) & 0xff))
@@ -71,7 +72,8 @@ pixel_t pixel(pixel_t rgba32) {
 }
 
 
-pixel_t pixel_to(pixfmt_id_t fmt_id, pixel_t rgba32) {
+pixel_t pixel_to(pixfmt_id_t fmt_id, pixel_t rgba32)
+{
     const pixfmt_t* fmt = &_PIXFMTS[fmt_id];
     return _comp_conv_32(fmt->offs[0], fmt->sizes[0],
                          ((rgba32 >> 0 ) & 0xff))
