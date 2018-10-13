@@ -119,6 +119,14 @@ pixel_t rgb(int r, int g, int b) {
 }
 
 
+void read_rgb(pixel_t p, int* r, int* g, int* b) {
+    p = pixel_conv(PIXFMT_FB, PIXFMT_RGB24, p);
+    *r = (p >> 16) & 0xff;
+    *g = (p >> 8) & 0xff;
+    *b = (p >> 0) & 0xff;
+}
+
+
 #ifdef TEST
 
 int main(void) {

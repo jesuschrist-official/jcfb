@@ -99,4 +99,10 @@ pixel_t pixel_conv(pixfmt_id_t in_fmt, pixfmt_id_t out_fmt, pixel_t p);
 pixel_t rgb(int r, int g, int b);
 
 
+/*
+ * Read the RGB component of the given framebuffer-formatted pixel.
+ */
+void read_rgb(pixel_t p, int* r, int* g, int* b);
+
+
 #endif
