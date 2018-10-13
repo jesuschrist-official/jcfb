@@ -2,7 +2,7 @@
  * JCFB primitive module - Draw primitive shapes
  *
  * For every drawing function, the color must be encoded using the
- * bitmap pixel format.
+ * target bitmap's pixel format.
  */
 #ifndef _jcfb_primitive_h_
 #define _jcfb_primitive_h_
@@ -34,7 +34,8 @@ void draw_line(bitmap_t* bmp, pixel_t color,
  * Draw a rectangle where (x1, y1) is the top-left corner, and (x2, y2)
  * the bottom-right.
  */
-void draw_rect(bitmap_t* bmp, pixel_t color, int x1, int y1, int x2, int y2);
+void draw_rect(bitmap_t* bmp, pixel_t color,
+               int x1, int y1, int x2, int y2);
 
 
 #endif
