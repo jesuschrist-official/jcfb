@@ -3,7 +3,7 @@
 
 
 static const char* evttypes_name[] = {
-    "PRESSED", "HELD", "RELEASED"
+    "PRESSED", "RELEASED"
 };
 
 
@@ -19,8 +19,9 @@ int main(void) {
         update_keyboard();
         keybevt_t evt;
         while (poll_keyboard(&evt)) {
-            printf("%s %s\n",
-                   key_names[evt.keyc], evttypes_name[evt.type]);
+            printf("%s %s %d\n",
+                   key_names[evt.keyc], evttypes_name[evt.type],
+                   evt.ticks);
         }
         if (is_key_pressed(KEYC_ESC)) {
             exit = 1;

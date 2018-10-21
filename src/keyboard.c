@@ -189,7 +189,8 @@ static keyboard_t _KB = {
 static int _push_evt(keybevt_type_t type, int raw_key) {
     keybevt_t evt = {
         .type = type,
-        .keyc = _KB.mappedkeys[raw_key]
+        .keyc = _KB.mappedkeys[raw_key],
+        .ticks = _KB.rawkeys[raw_key]
     };
 
     if (_KB.evts_count == MAXEVTS) {
@@ -370,8 +371,6 @@ void update_keyboard() {
     // read loop below.
     // Some events could not be notified in case of multiple keys
     // being pressed simultaneously.
-    bool mask[0x80] = {0};
-
     unsigned char raw_key = 0;
     while (read(_KB.fd, &raw_key, 1) != 0) {
         bool pressed = !(raw_key & 0x80);
@@ -414,27 +413,16 @@ void update_keyboard() {
         // If the key is newly pressed, we store the mapped key it
         // fired. This key code will be kept all the key-press life
         // frame.
-        if (pressed && !prevkeys[raw_key]) {
+        if (pressed && !_KB.rawkeys[raw_key]) {
             _KB.rawkeys[raw_key] = 1;
             _KB.keys[key] = 1;
             _KB.mappedkeys[raw_key] = key;
-            _push_evt(KEYBEVT_PRESSED, raw_key);
-            mask[raw_key] = 1;
         } else
-        if (pressed && prevkeys[raw_key]) {
-            _push_evt(KEYBEVT_HELD, raw_key);
-            mask[raw_key] = 1;
-        } else
-        if (!pressed && prevkeys[raw_key]) {
+        if (!pressed && _KB.rawkeys[raw_key]) {
             _push_evt(KEYBEVT_RELEASED, raw_key);
             _KB.rawkeys[raw_key] = 0;
             _KB.keys[_KB.mappedkeys[raw_key]] = 0;
-            mask[raw_key] = 1;
         }
-
-        // In case we encounter more than once some key event, we
-        // need to actualise the previous state.
-        prevkeys[raw_key] = _KB.rawkeys[raw_key];
 
 #ifdef KEYB_DEBUG
         printf("%s\n", key_names[key]);
@@ -443,8 +431,9 @@ void update_keyboard() {
 
     // Detect held keys that has not been fired.
     for (size_t raw_key = 0; raw_key < 0x80; raw_key++) {
-        if (!mask[raw_key] && _KB.rawkeys[raw_key]) {
-            _push_evt(KEYBEVT_HELD, raw_key);
+        if (_KB.rawkeys[raw_key]) {
+            _push_evt(KEYBEVT_PRESSED, raw_key);
+            _KB.rawkeys[raw_key]++;
         }
     }
 }

@@ -209,13 +209,11 @@ enum keyc {
 // Polling interface --------------------------------------------------
 /*
  * Keyboard event types.
- * Pressed means the key has just been pressed,
- * Released means the ke has just been released and
- * Held means the key is pressed for more than one update.
+ * Pressed means the key is pressed,
+ * Released means the ke has just been released.
  */
 typedef enum {
     KEYBEVT_PRESSED,
-    KEYBEVT_HELD,
     KEYBEVT_RELEASED,
 } keybevt_type_t;
 
@@ -226,6 +224,8 @@ typedef enum {
 typedef struct keybevt {
     keybevt_type_t type;
     keyc_t keyc;
+    int ticks;  /* If pressed, indicates the number of ticks since the
+                   key has been hit. */
 } keybevt_t;
 
 
