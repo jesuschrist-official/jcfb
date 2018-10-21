@@ -36,6 +36,7 @@ TTF=$(DBUILD)/$(DSAMPLE)/ttf.exe
 KEYBOARD=$(DBUILD)/$(DSAMPLE)/keyboard.exe
 MOUSE=$(DBUILD)/$(DSAMPLE)/mouse.exe
 MOVE=$(DBUILD)/$(DSAMPLE)/move.exe
+CONVERT=$(DBUILD)/$(DSAMPLE)/convert.exe
 
 
 # Rules
@@ -58,7 +59,7 @@ $(JCFB): $(DOBJ)/pixel.o \
 
 
 samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE) $(KEYBOARD) \
-		 $(MOUSE)
+		 $(MOUSE) $(CONVERT)
 
 
 $(PRINT): $(JCFB) $(DSAMPLE)/print.c
@@ -87,6 +88,10 @@ $(KEYBOARD): $(JCFB) $(DSAMPLE)/keyboard.c
 
 $(MOUSE): $(JCFB) $(DSAMPLE)/mouse.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb
+
+
+$(CONVERT): $(JCFB) $(DSAMPLE)/convert.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb -lm
 
 
 tests: $(DBUILD)/$(DTESTS)/pixel.test

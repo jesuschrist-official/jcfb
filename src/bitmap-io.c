@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -6,7 +7,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
 
+
+// Loading ------------------------------------------------------------
 int bitmap_load(bitmap_t* bmp, const char* path) {
     int w, h, n;
     pixel_t* data = (pixel_t*)stbi_load(path, &w, &h, &n, 4);
@@ -40,3 +45,101 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
     if (data) stbi_image_free(data);
     return 1;
 }
+
+
+// Saving -------------------------------------------------------------
+enum imgfmt {
+    IMGFMT_PNG,
+    IMGFMT_BMP,
+    IMGFMT_TGA,
+    IMGFMT_JPG,
+    IMGFMT_UNKNOWN,
+};
+
+
+const char _file_extensions[][16][16] = {
+    [IMGFMT_PNG] = {"png", ""},
+    [IMGFMT_BMP] = {"bmp", ""},
+    [IMGFMT_TGA] = {"tga", ""},
+    [IMGFMT_JPG] = {"jpg", "jpeg", ""},
+};
+
+
+static bool _has_ext(const char* path, const char* ext) {
+    int path_len = strlen(path);
+    int ext_len = strlen(ext);
+    if (ext_len + 1 >= path_len) {
+        return false;
+    }
+    if (path[path_len - 1 - ext_len] != '.') {
+        return false;
+    }
+    // TODO handle case agnostic
+    return !strcmp(path + path_len - ext_len, ext);
+}
+
+
+static enum imgfmt _find_fmt(const char* path) {
+    if (_has_ext(path, "png")) {
+        return IMGFMT_PNG;
+    } else
+    if (_has_ext(path, "bmp")) {
+        return IMGFMT_BMP;
+    } else
+    if (_has_ext(path, "tga")) {
+        return IMGFMT_TGA;
+    }
+    return IMGFMT_UNKNOWN;
+}
+
+
+static void* _prepare_data(const bitmap_t* bmp, pixfmt_id_t pixfmt) {
+    size_t psize = pixfmt_get(pixfmt).bpp / 8;
+    void* data = malloc(bmp->w * bmp->h * psize);
+    for (int i = 0; i < bmp->w * bmp->h; i++) {
+        pixel_t* pixel = (pixel_t*)(data + i * psize);
+        *pixel = pixel_conv(bmp->fmt, pixfmt, bmp->mem[i]);
+        if (psize == 4 && *pixel == 0x00ff00ff) {
+            *pixel = 0xff000000;
+        }
+    }
+    return data;
+}
+
+
+int bitmap_save(const bitmap_t* bmp, const char* path) {
+    void* data = NULL;
+#define CHECK(_x) if (!_x) goto error;
+    switch (_find_fmt(path)) {
+      case IMGFMT_PNG:
+        data = _prepare_data(bmp, PIXFMT_ABGR32);
+        CHECK(stbi_write_png(path, bmp->w, bmp->h, 4, data, 0));
+        break;
+
+      case IMGFMT_BMP:
+        data = _prepare_data(bmp, PIXFMT_BGR24);
+        CHECK(stbi_write_bmp(path, bmp->w, bmp->h, 3, data));
+        break;
+
+      case IMGFMT_TGA:
+        data = _prepare_data(bmp, PIXFMT_ABGR32);
+        CHECK(stbi_write_tga(path, bmp->w, bmp->h, 4, data));
+        break;
+
+      default:
+        fprintf(stderr, "unsuported image file format '%s'\n'",
+                        path);
+        goto error;
+    }
+#undef CHECK
+
+    if (data) free(data);
+    return 0;
+
+  error:
+    if (data) free(data);
+    return -1;
+}
+
+
+// --------------------------------------------------------------------
