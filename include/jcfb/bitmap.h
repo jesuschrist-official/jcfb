@@ -62,6 +62,18 @@ void bitmap_wipe(bitmap_t* bmp);
 
 
 /*
+ * Returns the address of the given pixel.
+ */
+pixel_t* bitmap_pixel_addr(bitmap_t* bmp, int x, int y);
+
+
+/*
+ * Returns the given pixel.
+ */
+pixel_t bitmap_pixel(const bitmap_t* bmp, int x, int y);
+
+
+/*
  * Returns the size of the bitmap allocated space in bytes.
  */
 size_t bitmap_memsize(const bitmap_t* bmp);
@@ -116,12 +128,6 @@ void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
  * Returns the size needed to store a bitmap line, in bytes.
  */
 size_t bitmap_line_size(const bitmap_t* bmp);
-
-
-/*
- * Returns the address of the given pixel.
- */
-pixel_t* bitmap_pixel_addr(bitmap_t* bmp, int x, int y);
 
 
 #endif
