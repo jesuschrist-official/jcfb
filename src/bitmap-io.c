@@ -27,10 +27,10 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
     pixel_t* src = data;
     for (size_t y = 0; y < h; y++) {
         for (size_t x = 0; x < w; x++) {
-            *dst = pixel_conv(PIXFMT_ABGR32, bmp->fmt, *src);
+            *dst = pixel_conv(PIXFMT_RGBA32, bmp->fmt, *src);
             // Map full-alpha to our mask color (bright purple).
             // We doesn't support other alpha values.
-            if ((*src & 0x000000ff) == 0x000000ff) {
+            if ((*src & 0xff000000) == 0xff000000) {
                 *dst = pixel_to(bmp->fmt, 0x00ff00ff);
             }
             dst++;
@@ -112,18 +112,18 @@ int bitmap_save(const bitmap_t* bmp, const char* path) {
 #define CHECK(_x) if (!_x) goto error;
     switch (_find_fmt(path)) {
       case IMGFMT_PNG:
-        data = _prepare_data(bmp, PIXFMT_ABGR32);
+        data = _prepare_data(bmp, PIXFMT_RGBA32);
         CHECK(stbi_write_png(path, bmp->w, bmp->h, 4, data, 0));
         break;
 
       case IMGFMT_BMP:
-        data = _prepare_data(bmp, PIXFMT_BGR24);
+        data = _prepare_data(bmp, PIXFMT_RGB24);
         CHECK(stbi_write_bmp(path, bmp->w, bmp->h, 3, data));
         break;
 
       case IMGFMT_TGA:
-        data = _prepare_data(bmp, PIXFMT_ABGR32);
-        CHECK(stbi_write_tga(path, bmp->w, bmp->h, 4, data));
+        data = _prepare_data(bmp, PIXFMT_RGB24);
+        CHECK(stbi_write_tga(path, bmp->w, bmp->h, 3, data));
         break;
 
       default:
