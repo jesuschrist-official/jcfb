@@ -77,16 +77,44 @@ void ttf_render_cp(const ttf_font_t* font, int cp, bitmap_t* bmp,
     free(bitmap);
 }
 
+
 void ttf_render(const ttf_font_t* font, const char* str, bitmap_t* bmp,
                 int x, int y, int height, pixel_t color)
 {
     float scale = stbtt_ScaleForPixelHeight(&font->font_info, height);
     for (int i = 0; i < strlen(str); i++) {
         int cp = str[i];
-        ttf_render_cp(font, cp, bmp, x, y, height, color);    
+        ttf_render_cp(font, cp, bmp, x, y, height, color);
+
         int advance;
         stbtt_GetCodepointHMetrics(&font->font_info, cp, &advance,
                                    NULL);
         x += advance * scale * 1.2;
     }
+}
+
+
+int ttf_width_cp(const ttf_font_t* font, int cp, int height) {
+    float scale = stbtt_ScaleForPixelHeight(&font->font_info, height);
+    int advance;
+    stbtt_GetCodepointHMetrics(&font->font_info, cp, &advance, NULL);
+    return advance * scale * 1.2;
+}
+
+
+int ttf_width(const ttf_font_t* font, int height, const char* str,
+              int size)
+{
+    if (size < 0) {
+        size = strlen(str);
+    }
+
+    int width = 0;
+    for (int i = 0; i < size - 1; i++) {
+        width += ttf_width_cp(font, str[i], height);
+    }
+    if (size > 0) {
+        width += ttf_width_cp(font, str[size - 1], height) * 1.3;
+    }
+    return width;
 }

@@ -44,4 +44,13 @@ void ttf_render(const ttf_font_t* font, const char* str, bitmap_t* bmp,
                 int x, int y, int height, pixel_t color);
 
 
+/*
+ * Returns the number of pixels necessary to draw `str` using font
+ * `font` with height of `height`. If `size` is not lower than zero,
+ * only the `size` first characters of `str` will be considered.
+ */
+int ttf_width(const ttf_font_t* font, int height, const char* str,
+              int size);
+
+
 #endif
