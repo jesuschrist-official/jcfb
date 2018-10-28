@@ -6,6 +6,7 @@
  *     This could be used to do regions of bitmaps without memory copy,
  *     allowing for exemple to do clipping.
  */
+#include <stdbool.h>
 #include <string.h>
 
 
@@ -255,4 +256,9 @@ void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
     for (; dy < dst->h && sy < src->h; dy++, sy++) {
         _bitmap_masked_blit_row(dst, src, x, dy, sy);
     }
+}
+
+
+bool bitmap_is_in(const bitmap_t* bmp, int x, int y) {
+    return !(x < 0 || x >= bmp->w || y < 0 || y >= bmp->h);
 }

@@ -10,6 +10,9 @@
 #define _jcfb_bitmap_h_
 
 
+#include <stdbool.h>
+
+
 #include "jcfb/pixel.h"
 
 
@@ -128,6 +131,12 @@ void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
  * Returns the size needed to store a bitmap line, in bytes.
  */
 size_t bitmap_line_size(const bitmap_t* bmp);
+
+
+/*
+ * Returns `true` if point (`x`, `y`) is in the given bitmap.
+ */
+bool bitmap_is_in(const bitmap_t* bmp, int x, int y);
 
 
 #endif
