@@ -4,7 +4,7 @@
 
 // Normal functions ---------------------------------------------------
 void draw_hline(bitmap_t* bmp, pixel_t color, int x1, int x2, int y) {
-    if (y < 0 || y >= bmp->h) {
+    if (y < 0 || y >= bmp->h || color == get_mask_color()) {
         return;
     }
     int x_min = max(min(x1, x2), 0);
@@ -18,6 +18,9 @@ void draw_hline(bitmap_t* bmp, pixel_t color, int x1, int x2, int y) {
 
 
 void draw_vline(bitmap_t* bmp, pixel_t color, int x, int y1, int y2) {
+    if (x < 0 || x >= bmp->w || color == get_mask_color()) {
+        return;
+    }
     int y_min = max(min(y1, y2), 0);
     int y_max = min(max(y1, y2), bmp->h - 1);
     pixel_t* addr = bitmap_pixel_addr(bmp, x, y_min);
