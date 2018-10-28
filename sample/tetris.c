@@ -392,7 +392,7 @@ void draw_tile(bitmap_t* bmp, int x, int y, tetrimino_id_t id) {
     int y1 = (y - 2) * res_h + 1;   // -2 is to adapt coordinates
     int y2 = (y - 1) * res_h - 1;
 
-    draw_rect(bmp, pixel(tetrimino_colors[id]), x1, y1, x2, y2);
+    fill_rect(bmp, pixel(tetrimino_colors[id]), x1, y1, x2, y2);
 }
 
 
