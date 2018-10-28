@@ -134,6 +134,23 @@ void read_rgb(pixel_t p, int* r, int* g, int* b) {
 }
 
 
+int get_alpha(pixel_t p) {
+    pixfmt_t fmt = pixfmt_get(PIXFMT_FB);
+    return (p >> fmt.offs[COMP_ALPHA])
+         & ~(UINT32_MAX << fmt.sizes[COMP_ALPHA]);
+}
+
+
+bool has_alpha(pixfmt_id_t fmt) {
+    return pixfmt_get(fmt).sizes[COMP_ALPHA] > 0;
+}
+
+
+pixel_t get_mask_color() {
+    return 0xff000000;
+}
+
+
 #ifdef TEST
 
 int main(void) {

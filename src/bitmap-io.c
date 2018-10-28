@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "jcfb/pixel.h"
 #include "jcfb/bitmap-io.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -23,15 +24,18 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
         goto error;
     }
 
+    bool alpha = has_alpha(bmp->fmt);
     pixel_t* dst = bmp->mem;
     pixel_t* src = data;
     for (size_t y = 0; y < h; y++) {
         for (size_t x = 0; x < w; x++) {
+            // Inverse alpha-component (0 means full color, 1 no color)
+            *src = (*src & 0x00ffffff) | ((0xff - (*src >> 24)) << 24);
             *dst = pixel_conv(PIXFMT_RGBA32, bmp->fmt, *src);
-            // Map full-alpha to our mask color (bright purple).
-            // We doesn't support other alpha values.
-            if ((*src & 0xff000000) == 0xff000000) {
-                *dst = pixel_to(bmp->fmt, 0x00ff00ff);
+            if (!alpha && (*src & 0xff000000) == 0xff000000) {
+                // XXX this can lead to bugs if RGB24 is not encoded
+                //     as I think it should be :p
+                *dst = 0xff000000;
             }
             dst++;
             src++;
@@ -98,9 +102,10 @@ static void* _prepare_data(const bitmap_t* bmp, pixfmt_id_t pixfmt) {
     void* data = malloc(bmp->w * bmp->h * psize);
     for (int i = 0; i < bmp->w * bmp->h; i++) {
         pixel_t* pixel = (pixel_t*)(data + i * psize);
-        *pixel = pixel_conv(bmp->fmt, pixfmt, bmp->mem[i]);
-        if (psize == 4 && *pixel == 0x00ff00ff) {
-            *pixel = 0xff000000;
+        *pixel = 0xff000000
+               | pixel_conv(bmp->fmt, pixfmt, bmp->mem[i]);
+        if ((bmp->mem[i] & 0xff000000) == 0xff000000) {
+            *pixel = 0x00000000;
         }
     }
     return data;

@@ -167,10 +167,13 @@ static void _blit_scaled_row(bitmap_t* dst, const bitmap_t* src,
     int dx = max(0, x);
     float sx = max(0, -x);
     float xratio = src->w / (float)w;
+    pixel_t mask = get_mask_color();
     for (; dx < min(x + w, dst->w) && sx * xratio < src->w; dx++, sx++)
     {
         size_t src_off = sy * src->w + sx * xratio;
-        dst->mem[y * dst->w + dx] = src->mem[src_off];
+        if (src->mem[src_off] != mask) {
+            dst->mem[y * dst->w + dx] = src->mem[src_off];
+        }
     }
 }
 
@@ -201,10 +204,14 @@ static void _blit_scaled_region_row(bitmap_t* dst, const bitmap_t* src,
 
     float xratio = src_w / (float)dst_w;
 
+    pixel_t mask = get_mask_color();
+
     for (; dx < dx_max && src_x + sx * xratio < sx_max; dx++, sx++) {
         size_t dst_off = dst_y * dst->w + dx;
         size_t src_off = (size_t)(src_y * src->w + src_x + sx * xratio);
-        dst->mem[dst_off] = src->mem[src_off];
+        if (src->mem[src_off] != mask) {
+            dst->mem[dst_off] = src->mem[src_off];
+        }
     }
 }
 
@@ -234,7 +241,7 @@ void bitmap_scaled_region_blit(bitmap_t* dst, const bitmap_t* src,
 static void _bitmap_masked_blit_row(bitmap_t* dst, const bitmap_t* src,
                                     int dx, int dy, int sy)
 {
-    pixel_t mask = pixel_to(src->fmt, 0x00ff00ff);
+    pixel_t mask = get_mask_color();
 
     // If `dx` is offscreen, we start to copy the row from '-dx'.
     int sx = max(0, -dx);

@@ -20,6 +20,7 @@
 #define _jcfb_pixel_h_
 
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -114,9 +115,27 @@ pixel_t rgb(int r, int g, int b);
 
 
 /*
- * Read the RGB component of the given framebuffer-formatted pixel.
+ * Read the RGB component of the given framebuffer-formated pixel.
  */
 void read_rgb(pixel_t p, int* r, int* g, int* b);
+
+
+/*
+ * Query the alpha component of the given framebuffer-formated pixel.
+ */
+int get_alpha(pixel_t p);
+
+
+/*
+ * Returns true if the given pixel format has an alpha component.
+ */
+bool has_alpha(pixfmt_id_t fmt);
+
+
+/*
+ * Returns the framebuffer mask color.
+ */
+pixel_t get_mask_color();
 
 
 #endif
