@@ -67,7 +67,7 @@ void ttf_render_cp(const ttf_font_t* font, int cp, bitmap_t* bmp,
         int dx = min(x, bmp->w - 1);
         int sx = 0;
         for (; dx < bmp->w && sx < sw; dx++, sx++) {
-            if (!bitmap[sy * sw + sx]) {
+            if (bitmap[sy * sw + sx] < 128) {
                 continue;
             }
             bitmap_put_pixel(bmp, dx, dy, color);
