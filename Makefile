@@ -37,6 +37,7 @@ KEYBOARD=$(DBUILD)/$(DSAMPLE)/keyboard.exe
 MOUSE=$(DBUILD)/$(DSAMPLE)/mouse.exe
 MOVE=$(DBUILD)/$(DSAMPLE)/move.exe
 CONVERT=$(DBUILD)/$(DSAMPLE)/convert.exe
+PRIMITIVE=$(DBUILD)/$(DSAMPLE)/primitive.exe
 
 
 # Rules
@@ -59,7 +60,7 @@ $(JCFB): $(DOBJ)/pixel.o \
 
 
 samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE) $(KEYBOARD) \
-		 $(MOUSE) $(CONVERT)
+		 $(MOUSE) $(CONVERT) $(PRIMITIVE)
 
 
 $(PRINT): $(JCFB) $(DSAMPLE)/print.c
@@ -94,6 +95,10 @@ $(CONVERT): $(JCFB) $(DSAMPLE)/convert.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb -lm
 
 
+$(PRIMITIVE): $(JCFB) $(DSAMPLE)/primitive.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb -lm
+
+
 tests: $(DBUILD)/$(DTESTS)/pixel.test
 
 
@@ -107,7 +112,7 @@ benchmarks: $(DBUILD)/$(DBENCH)/pixel-conversion.bench \
 
 
 $(DBUILD)/$(DBENCH)/%.bench: $(DBENCH)/%.c
-	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb -lncurses
+	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb
 
 
 $(DBUILD):

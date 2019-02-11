@@ -56,6 +56,29 @@ void fill_rect(bitmap_t* bmp, pixel_t color, int x1, int y1,
 }
 
 
+static bool _is_point_in_circle(int cx, int cy, int r, int x, int y) {
+    int dx = cx - x;
+    int dy = cy - y;
+    return dx * dx + dy * dy <= r * r;
+}
+
+
+void fill_circle(bitmap_t* bmp, pixel_t color, int x, int y, int r) {
+    int min_x = max(0, x - r);
+    int max_x = min(x + r, bmp->w - 1);
+    int min_y = max(0, y - r);
+    int max_y = min(y + r, bmp->h - 1);
+    for (int dy = min_y; dy <= max_y; dy++) {
+        for (int dx = min_x; dx <= max_x; dx++) {
+            if (_is_point_in_circle(x, y, r, dx, dy)) {
+                pixel_t* addr = bitmap_pixel_addr(bmp, dx, dy);
+                *addr = color;
+            }
+        }
+    }
+}
+
+
 // Dashed functions ---------------------------------------------------
 void draw_dashed_hline(bitmap_t* bmp, pixel_t color_a, pixel_t color_b,
                        int x1, int x2, int y,

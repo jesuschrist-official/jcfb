@@ -47,6 +47,13 @@ void fill_rect(bitmap_t* bmp, pixel_t color,
 
 
 /*
+ * Fill a circle of radius `r` and center (`x`, `y`) using color
+ * `color`.
+ */
+void fill_circle(bitmap_t* bmp, pixel_t color, int x, int y, int r);
+
+
+/*
  * Draw a dashed horizontal line.
  *
  * `dash_length` is the length of a dash (and of a gape).
