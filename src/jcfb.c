@@ -46,20 +46,18 @@ static void (*_sigabrt_handler)(int) = NULL;
 
 
 static size_t _FB_memsize() {
-    return (  _FB.var_si.xres_virtual
-            * _FB.var_si.yres_virtual
-            * _FB.var_si.bits_per_pixel) / 8;
+    return _FB.fix_si.smem_len;
 }
 
 
 static void _draw_frame(bitmap_t* bmp) {
-    uint8_t* dest = _FB.mem;
     size_t bpp = _FB.var_si.bits_per_pixel / 8;
-    pixel_t* src = bmp->mem;
-    for (size_t i  = 0; i < bmp->w * bmp->h; i++) {
-        memcpy(dest, src, bpp);
-        dest += bpp;
-        src++;
+    for (size_t y = 0; y < bmp->h; y++) {
+        uint8_t* dest = _FB.mem + y * _FB.fix_si.line_length;
+        pixel_t* src = bmp->mem + y * bmp->w;
+        for (size_t x = 0; x < bmp->w; x++) {
+            memcpy(dest + x * bpp, src + x, bpp);
+        }
     }
 }
 

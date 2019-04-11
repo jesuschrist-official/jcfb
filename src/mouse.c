@@ -63,7 +63,7 @@ struct mouse_frame {
     uint8_t x;
     uint8_t y;
 };
-static_assert(
+_Static_assert(
     sizeof(struct mouse_frame) == 3,
     "struct mouse_frame must have a size of 3 bytes"
 );
