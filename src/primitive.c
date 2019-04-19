@@ -57,9 +57,9 @@ void fill_rect(bitmap_t* bmp, pixel_t color, int x1, int y1,
 
 
 static bool _is_point_in_circle(int cx, int cy, int r, int x, int y) {
-    int dx = cx - x;
-    int dy = cy - y;
-    return dx * dx + dy * dy <= r * r;
+    int dx = x - cx;
+    int dy = y - cy;
+    return dx * dx + dy * dy - r * r <= -1;
 }
 
 
@@ -76,6 +76,38 @@ void fill_circle(bitmap_t* bmp, pixel_t color, int x, int y, int r) {
             }
         }
     }
+    draw_circle(bmp, color, x, y, r);
+}
+
+
+static void _draw_circle(bitmap_t* bmp, pixel_t color, int xc, int yc,
+                         int x, int y)
+{
+    bitmap_put_pixel(bmp, xc + x, yc + y, color);
+    bitmap_put_pixel(bmp, xc - x, yc + y, color);
+    bitmap_put_pixel(bmp, xc + x, yc - y, color);
+    bitmap_put_pixel(bmp, xc - x, yc - y, color);
+    bitmap_put_pixel(bmp, xc + y, yc + x, color);
+    bitmap_put_pixel(bmp, xc - y, yc + x, color);
+    bitmap_put_pixel(bmp, xc + y, yc - x, color);
+    bitmap_put_pixel(bmp, xc - y, yc - x, color);
+}
+
+
+void draw_circle(bitmap_t* bmp, pixel_t color, int xc, int yc, int r) {
+        int x = 0, y = r;
+        int d = 3 - 2 * r;
+        _draw_circle(bmp, color, xc, yc, x, y);
+        while (y >= x) {
+            x++;
+            if (d > 0) {
+                y--;
+                d = d + 4 * (x - y) + 10;
+            } else {
+                d = d + 4 * x + 6;
+            }
+            _draw_circle(bmp, color, xc, yc, x, y);
+        }
 }
 
 

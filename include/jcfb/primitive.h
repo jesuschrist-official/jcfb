@@ -47,6 +47,13 @@ void fill_rect(bitmap_t* bmp, pixel_t color,
 
 
 /*
+ * Draw a circle of radius `r` and center (`x`, `y`) using color
+ * `color`.
+ */
+void draw_circle(bitmap_t* bmp, pixel_t color, int x, int y, int r);
+
+
+/*
  * Fill a circle of radius `r` and center (`x`, `y`) using color
  * `color`.
  */

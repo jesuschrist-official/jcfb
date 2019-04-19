@@ -81,6 +81,9 @@ size_t bitmap_memsize(const bitmap_t* bmp) {
 
 
 void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color) {
+    if (x < 0 || x >= bmp->w || y < 0 || y >= bmp->h) {
+        return;
+    }
     bmp->mem[y * bmp->w + x] = color;
 }
 
