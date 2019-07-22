@@ -84,10 +84,15 @@ size_t bitmap_memsize(const bitmap_t* bmp);
 
 /*
  * Put a RGBA32 pixel at the given coordinates of the bitmap.
- * This function need to convert the given pixel every time it is
- * called, that will be slow.
  */
 void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color);
+
+
+/*
+ * Put a RGBA32 pixel at the given coordinates of the bitmap.
+ * The `color` is added to the bitmap pixel for additive blending
+ */
+void bitmap_put_pixel_blend_add(bitmap_t* bmp, int x, int y, pixel_t color);
 
 
 /*
@@ -96,6 +101,7 @@ void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color);
 void bitmap_clear(bitmap_t* bmp, pixel_t color);
 
 
+/* Regular blits ----------------------------------------------------------- */
 /*
  * Blit the `src` bitmap at the given position of `dst` bitmap.
  */
@@ -137,6 +143,27 @@ size_t bitmap_line_size(const bitmap_t* bmp);
  * Returns `true` if point (`x`, `y`) is in the given bitmap.
  */
 bool bitmap_is_in(const bitmap_t* bmp, int x, int y);
+
+
+/* Additive blend blits ---------------------------------------------------- */
+void bitmap_blit_blend_add(bitmap_t* dst, const bitmap_t* src, int x, int y);
+
+
+void bitmap_scaled_blit_blend_add(bitmap_t* dst, const bitmap_t* src,
+                                  int x, int y, int w, int h);
+
+
+void bitmap_scaled_region_blit_blend_add(bitmap_t* dst, const bitmap_t* src,
+                                         int sx, int sy, int sw, int sh,
+                                         int dx, int dy, int dw, int dh);
+
+
+void bitmap_masked_blit_blend_add(bitmap_t* dst, const bitmap_t* src,
+                                  int x, int y);
+
+
+
+/* ------------------------------------------------------------------------- */
 
 
 #endif

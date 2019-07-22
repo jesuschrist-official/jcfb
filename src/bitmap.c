@@ -80,11 +80,33 @@ size_t bitmap_memsize(const bitmap_t* bmp) {
 }
 
 
+static pixel_t _pixel_blend_add(pixel_t dst, pixel_t src) {
+    int dr, dg, db;
+    int sr, sg, sb;
+    read_rgb(dst, &dr, &dg, &db);
+    read_rgb(src, &sr, &sg, &sb);
+    dr = min(255, dr + sr);
+    dg = min(255, dg + sg);
+    db = min(255, db + sb);
+    return rgb(dr, dg, db);
+}
+
+
 void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color) {
     if (x < 0 || x >= bmp->w || y < 0 || y >= bmp->h) {
         return;
     }
     bmp->mem[y * bmp->w + x] = color;
+}
+
+
+void bitmap_put_pixel_blend_add(bitmap_t* bmp, int x, int y, pixel_t color) {
+    if (x < 0 || x >= bmp->w || y < 0 || y >= bmp->h) {
+        return;
+    }
+    bmp->mem[y * bmp->w + x] = _pixel_blend_add(
+        bmp->mem[y * bmp->w + x], color
+    );
 }
 
 
@@ -97,36 +119,8 @@ void bitmap_clear(bitmap_t* bmp, pixel_t color) {
 }
 
 
-
-// In the following blit functions,
-// x, y are the coordinates requested by the user,
-// dx, dy are the current final coordinates on the `dst` bitmap and
-// sx, sy are the current final coordinates on the `src` bitmap.
-static void _blit_row(bitmap_t* dst, const bitmap_t* src,
-                      int x, int dy, int sy)
-{
-    int dx = max(0, x);
-    int sx = max(0, -x);
-    int max_size = min(src->w - sx, dst->w - dx);
-    if (max_size < 0) {
-        return;
-    }
-    pixel_t* dest_addr = dst->mem + dy * dst->w + dx;
-    const pixel_t* src_addr = src->mem + sy * src->w + sx;
-    memcpy(dest_addr, src_addr, max_size * sizeof(pixel_t));
-}
-
-
-static void _fast_blit(bitmap_t* dst, const bitmap_t* src,
-                       int x, int y)
-{
-    // If `y` is offscreen, we start to copy `src` from the `-y` row to
-    // `dst` on the first row.
-    int dy = max(0, y);
-    int sy = max(0, -y);
-    for (; dy < dst->h && sy < src->h; dy++, sy++) {
-        _blit_row(dst, src, x, dy, sy);
-    }
+bool bitmap_is_in(const bitmap_t* bmp, int x, int y) {
+    return !(x < 0 || x >= bmp->w || y < 0 || y >= bmp->h);
 }
 
 
@@ -142,132 +136,13 @@ static void _convert_row(bitmap_t* dst, int x, int dy,
 }
 
 
-static void _slow_blit(bitmap_t* dst, const bitmap_t* src,
-                       int x, int y)
-{
-    int dy = max(0, y);
-    int sy = max(0, -dy);
-    for (; dy < dst->h && sy < src->h; dy++, sy++) {
-        _blit_row(dst, src, x, dy, sy);
-        _convert_row(dst, x, dy, src->fmt);
-    }
-}
+#define BLIT_PIXEL_FUNC(_dst, _src) _dst = _src
+#define BLIT_FUNC_SUFFIX
+#include "bitmap-blit.inc.c"
 
 
-void bitmap_blit(bitmap_t* dst, const bitmap_t* src, int x, int y) {
-    if (dst->fmt == src->fmt) {
-        _fast_blit(dst, src, x, y);
-    } else {
-        _slow_blit(dst, src, x, y);
-    }
-}
+#define BLIT_PIXEL_FUNC(_dst, _src) _dst = _pixel_blend_add(_dst, _src)
+#define BLIT_FUNC_SUFFIX _blend_add
+#include "bitmap-blit.inc.c"
 
 
-static void _blit_scaled_row(bitmap_t* dst, const bitmap_t* src,
-                             int x, int y, int w, int sy)
-{
-    int dx = max(0, x);
-    float sx = max(0, -x);
-    float xratio = src->w / (float)w;
-    pixel_t mask = get_mask_color();
-    for (; dx < min(x + w, dst->w) && sx * xratio < src->w; dx++, sx++)
-    {
-        size_t src_off = sy * src->w + sx * xratio;
-        if (src->mem[src_off] != mask) {
-            dst->mem[y * dst->w + dx] = src->mem[src_off];
-        }
-    }
-}
-
-
-void bitmap_scaled_blit(bitmap_t* dst, const bitmap_t* src,
-                        int x, int y, int w, int h)
-{
-    int dy = max(0, y);
-    float sy = max(0, -y);
-    float yratio = src->h / (float)h;
-    for (; dy < min(y + h, dst->h) && sy * yratio < src->h; dy++, sy++)
-    {
-        _blit_scaled_row(dst, src, x, dy, w, sy * yratio);
-    }
-}
-
-
-static void _blit_scaled_region_row(bitmap_t* dst, const bitmap_t* src,
-                                    int dst_x, int dst_y, int dst_w,
-                                    int src_x, int src_y,
-                                    int src_w)
-{
-    int dx = max(0, dst_x);
-    int sx = max(0, -dst_x);
-
-    int dx_max = min(dst_x + dst_w, dst->w);
-    int sx_max = min(src_x + src_w, src->w);
-
-    float xratio = src_w / (float)dst_w;
-
-    pixel_t mask = get_mask_color();
-
-    for (; dx < dx_max && src_x + sx * xratio < sx_max; dx++, sx++) {
-        size_t dst_off = dst_y * dst->w + dx;
-        size_t src_off = (size_t)(src_y * src->w + src_x + sx * xratio);
-        if (src->mem[src_off] != mask) {
-            dst->mem[dst_off] = src->mem[src_off];
-        }
-    }
-}
-
-
-void bitmap_scaled_region_blit(bitmap_t* dst, const bitmap_t* src,
-                               int src_x, int src_y, int src_w,
-                               int src_h,
-                               int dst_x, int dst_y, int dst_w,
-                               int dst_h)
-{
-    int dy = max(0, dst_y);
-    float sy = max(0, -dst_y);
-
-    int dy_max = min(dst_y + dst_h, dst->h);
-    float sy_max = min(src_y + src_h, src->h);
-
-    float yratio = src_h / (float)dst_h;
-
-    for (; dy < dy_max && src_y + sy * yratio < sy_max; dy++, sy++) {
-        _blit_scaled_region_row(dst, src,
-                                dst_x, dy, dst_w,
-                                src_x, src_y + sy * yratio, src_w);
-    }
-}
-
-
-static void _bitmap_masked_blit_row(bitmap_t* dst, const bitmap_t* src,
-                                    int dx, int dy, int sy)
-{
-    pixel_t mask = get_mask_color();
-
-    // If `dx` is offscreen, we start to copy the row from '-dx'.
-    int sx = max(0, -dx);
-    dx = max(0, dx);
-    for (; dx < dst->w && sx < src->w; dx++, sx++) {
-        pixel_t p = src->mem[sy * src->w + sx];
-        if (p != mask) {
-            dst->mem[dy * dst->w + dx] = p;
-        }
-    }
-}
-
-
-void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
-                        int x, int y)
-{
-    int sy = max(0, -y);
-    int dy = max(0, y);
-    for (; dy < dst->h && sy < src->h; dy++, sy++) {
-        _bitmap_masked_blit_row(dst, src, x, dy, sy);
-    }
-}
-
-
-bool bitmap_is_in(const bitmap_t* bmp, int x, int y) {
-    return !(x < 0 || x >= bmp->w || y < 0 || y >= bmp->h);
-}

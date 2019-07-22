@@ -102,22 +102,48 @@ static float _masked_blit_bench() {
 }
 
 
+static float _blit_blend_add_bench() {
+    bitmap_t bmp_a, bmp_b;
+
+    bitmap_init_ex(&bmp_a, PIXFMT_RGB24, 1024, 768);
+    bitmap_init_ex(&bmp_b, PIXFMT_RGB24, 1920, 1080);
+
+    struct timeval start, stop;
+
+    gettimeofday(&start, NULL);
+    for (volatile size_t i = 0; i < NITERATIONS; i++) {
+        bitmap_blit_blend_add(&bmp_a, &bmp_b, 0, 0);
+    }
+    gettimeofday(&stop, NULL);
+    float elapsed = (stop.tv_sec + stop.tv_usec * 1E-6)
+                  - (start.tv_sec + start.tv_usec * 1E-6);
+
+    bitmap_wipe(&bmp_a);
+    bitmap_wipe(&bmp_b);
+
+    return NITERATIONS * (1.0f / elapsed);
+}
+
+
 int main(void) {
     float slow_blit_rate = _slow_blit_bench();
     float fast_blit_rate = _fast_blit_bench();
     float scaled_blit_rate = _scaled_blit_bench();
     float masked_blit_rate = _masked_blit_bench();
+    float blit_blend_add_rate = _blit_blend_add_bench();
     float ratio = fast_blit_rate / slow_blit_rate;
 
     printf("Slow blit rate:   %.2f blits/s\n"
            "Fast blit rate:   %.2f blits/s\n"
            "Scaled blit rate: %.2f blits/s\n"
            "Masked blit rate: %.2f blits/s\n"
+           "Additive blending blit rate: %.2f blits/s\n"
            "Fast blit is %.2f times faster than slow blit\n",
            slow_blit_rate,
            fast_blit_rate,
            scaled_blit_rate,
            masked_blit_rate,
+           blit_blend_add_rate,
            ratio);
 
     return 0;
