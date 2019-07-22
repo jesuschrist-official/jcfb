@@ -22,7 +22,7 @@ ifeq ($(DEBUG),1)
 	CFLAGS+=-DDEBUG -g
 endif
 ifeq ($(RELEASE),1)
-	CFLAGS+=-DRELEASE -O3
+	CFLAGS+=-DRELEASE -O3 -flto
 endif
 
 
