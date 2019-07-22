@@ -142,7 +142,7 @@ void draw(bitmap_t* bmp, const int* iterations, int it_max) {
     for (int yi = 0; yi < bmp->h; yi++) {
         for (int xi = 0; xi < bmp->w; xi++) {
             int it = iterations[yi * bmp->w + xi];
-            bitmap_put_pixel(bmp, xi, yi, palette[(int)(k * log(it))]);
+            bitmap_put_pixel(bmp, xi, yi, pixel(palette[(int)(k * log(it))]));
         }
     }
 }
