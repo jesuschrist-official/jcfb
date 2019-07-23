@@ -38,6 +38,7 @@ MOUSE=$(DBUILD)/$(DSAMPLE)/mouse.exe
 MOVE=$(DBUILD)/$(DSAMPLE)/move.exe
 CONVERT=$(DBUILD)/$(DSAMPLE)/convert.exe
 PRIMITIVE=$(DBUILD)/$(DSAMPLE)/primitive.exe
+FIREWORK=$(DBUILD)/$(DSAMPLE)/firework.exe
 
 
 # Rules
@@ -60,7 +61,7 @@ $(JCFB): $(DOBJ)/pixel.o \
 
 
 samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE) $(KEYBOARD) \
-		 $(MOUSE) $(CONVERT) $(PRIMITIVE)
+		 $(MOUSE) $(CONVERT) $(PRIMITIVE) $(FIREWORK)
 
 
 $(PRINT): $(JCFB) $(DSAMPLE)/print.c
@@ -96,6 +97,9 @@ $(CONVERT): $(JCFB) $(DSAMPLE)/convert.c
 
 
 $(PRIMITIVE): $(JCFB) $(DSAMPLE)/primitive.c
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb -lm
+
+$(FIREWORK): $(JCFB) $(DSAMPLE)/firework.c
 	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb -lm
 
 
