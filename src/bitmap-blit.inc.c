@@ -16,6 +16,26 @@
 // x, y are the coordinates requested by the user,
 // dx, dy are the current final coordinates on the `dst` bitmap and
 // sx, sy are the current final coordinates on the `src` bitmap.
+//
+// user-coordinates are clamped to avoid copy in invalid memory. For exemple,
+// if the `x` given by the user is negative, we ajust the source coordinate
+// `sx` such that it corresponds to the shift given by the user (the distance
+// from x to zero), as shown below, with x = -3, dx = 0, sx = 3 :
+//
+//   x  dx
+//   |  |
+//   |  v
+//   |  ddddddddddd
+//   v  ddddddddddd
+//   sssssssddddddd
+//   sssssssddddddd
+//   sssssssddddddd
+//      ddddddddddd
+//      ddddddddddd
+//      ^
+//      |
+//      sx
+//
 static void FUNC(_blit_row)(bitmap_t* dst, const bitmap_t* src,
                             int x, int dy, int sy)
 {

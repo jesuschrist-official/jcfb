@@ -4,12 +4,12 @@
 
 
 
-JCFB is a C graphic library using the Linux' framebuffer to provide
-functions to do graphic (multimedia) programming in a TTY.
+JCFB is a C graphic library using the Linux' framebuffer to provide functions
+to do graphic (multimedia) programming in a TTY.
 
-JCFB provides high-level support for framebuffer memory access,
-bitmaps loading & blitting, primitive & text rendering,
-keybaord & mouse support. This is enough to do many things.
+JCFB provides high-level support for framebuffer memory access, bitmaps loading
+& blitting, primitive & text rendering, keybaord & mouse support.
+This is enough to do many things.
 
 
 Build the library using the provided Makefile.
