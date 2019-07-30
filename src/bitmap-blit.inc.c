@@ -194,6 +194,57 @@ void FUNC(bitmap_masked_blit)(bitmap_t* dst, const bitmap_t* src,
 }
 
 
+static void FUNC(_blit_row_hflip)(bitmap_t* dst, const bitmap_t* src,
+                                  int x, int dy, int sy)
+{
+    int dx = max(0, x);
+    int sx = max(0, -x);
+    int max_size = min(src->w - sx, dst->w - dx);
+    if (max_size < 0) {
+        return;
+    }
+    pixel_t* dest_addr = dst->mem + dy * dst->w + dx;
+    const pixel_t* src_addr = src->mem + sy * src->w + src->w - sx - 1;
+    for (size_t i = 0; i < max_size; i++) {
+        BLIT_PIXEL_FUNC(dest_addr[i], src_addr[-i]);
+    }
+}
+
+
+static void FUNC(_fast_blit_hflip)(bitmap_t* dst, const bitmap_t* src,
+                                   int x, int y)
+{
+    // If `y` is offscreen, we start to copy `src` from the `-y` row to
+    // `dst` on the first row.
+    int dy = max(0, y);
+    int sy = max(0, -y);
+    for (; dy < dst->h && sy < src->h; dy++, sy++) {
+        FUNC(_blit_row_hflip)(dst, src, x, dy, sy);
+    }
+}
+
+
+static void FUNC(_slow_blit_hflip)(bitmap_t* dst, const bitmap_t* src,
+                                   int x, int y)
+{
+    int dy = max(0, y);
+    int sy = max(0, -dy);
+    for (; dy < dst->h && sy < src->h; dy++, sy++) {
+        _blit_row_hflip(dst, src, x, dy, sy);
+        _convert_row(dst, x, dy, src->fmt);
+    }
+}
+
+
+void FUNC(bitmap_blit_hflip)(bitmap_t* dst, const bitmap_t* src, int x, int y)
+{
+    if (dst->fmt == src->fmt) {
+        FUNC(_fast_blit_hflip)(dst, src, x, y);
+    } else {
+        FUNC(_slow_blit_hflip)(dst, src, x, y);
+    }
+}
+
 #undef BLIT_FUNC_SUFFIX
 #undef BLIT_PIXEL_FUNC
 #undef __TCONCAT

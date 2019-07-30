@@ -101,6 +101,18 @@ void bitmap_put_pixel_blend_add(bitmap_t* bmp, int x, int y, pixel_t color);
 void bitmap_clear(bitmap_t* bmp, pixel_t color);
 
 
+/*
+ * Returns the size needed to store a bitmap line, in bytes.
+ */
+size_t bitmap_line_size(const bitmap_t* bmp);
+
+
+/*
+ * Returns `true` if point (`x`, `y`) is in the given bitmap.
+ */
+bool bitmap_is_in(const bitmap_t* bmp, int x, int y);
+
+
 /* Regular blits ----------------------------------------------------------- */
 /*
  * Blit the `src` bitmap at the given position of `dst` bitmap.
@@ -133,16 +145,12 @@ void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
                         int x, int y);
 
 
-/*
- * Returns the size needed to store a bitmap line, in bytes.
- */
-size_t bitmap_line_size(const bitmap_t* bmp);
-
 
 /*
- * Returns `true` if point (`x`, `y`) is in the given bitmap.
+ * Like `bitmap_blit()`, but flip on the x-axis
  */
-bool bitmap_is_in(const bitmap_t* bmp, int x, int y);
+void bitmap_blit_hflip(bitmap_t* dst, const bitmap_t* src, int x, int y);
+
 
 
 /* Additive blend blits ---------------------------------------------------- */
@@ -160,6 +168,10 @@ void bitmap_scaled_region_blit_blend_add(bitmap_t* dst, const bitmap_t* src,
 
 void bitmap_masked_blit_blend_add(bitmap_t* dst, const bitmap_t* src,
                                   int x, int y);
+
+
+void bitmap_blit_hflip_blend_add(bitmap_t* dst, const bitmap_t* src,
+                                 int x, int y);
 
 
 
