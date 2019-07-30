@@ -146,3 +146,9 @@ static void _convert_row(bitmap_t* dst, int x, int dy,
 #include "bitmap-blit.inc.c"
 
 
+#define BLIT_PIXEL_FUNC(_dst, _src) \
+    if (_src != get_mask_color()) { \
+        _dst = _src; \
+    }
+#define BLIT_FUNC_SUFFIX _masked
+#include "bitmap-blit.inc.c"

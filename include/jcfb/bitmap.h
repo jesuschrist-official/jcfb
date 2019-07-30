@@ -174,6 +174,26 @@ void bitmap_blit_hflip_blend_add(bitmap_t* dst, const bitmap_t* src,
                                  int x, int y);
 
 
+/* Masked blits ------------------------------------------------------------ */
+void bitmap_blit_masked(bitmap_t* dst, const bitmap_t* src, int x, int y);
+
+
+void bitmap_scaled_blit_masked(bitmap_t* dst, const bitmap_t* src,
+                               int x, int y, int w, int h);
+
+
+void bitmap_scaled_region_blit_masked(bitmap_t* dst, const bitmap_t* src,
+                                      int sx, int sy, int sw, int sh,
+                                      int dx, int dy, int dw, int dh);
+
+
+void bitmap_masked_blit_masked(bitmap_t* dst, const bitmap_t* src,
+                               int x, int y);
+
+
+void bitmap_blit_hflip_masked(bitmap_t* dst, const bitmap_t* src,
+                              int x, int y);
+
 
 /* ------------------------------------------------------------------------- */
 

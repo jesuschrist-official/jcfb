@@ -93,13 +93,10 @@ static void FUNC(_blit_scaled_row)(bitmap_t* dst, const bitmap_t* src,
     int dx = max(0, x);
     float sx = max(0, -x);
     float xratio = src->w / (float)w;
-    pixel_t mask = get_mask_color();
     for (; dx < min(x + w, dst->w) && sx * xratio < src->w; dx++, sx++)
     {
         size_t src_off = sy * src->w + sx * xratio;
-        if (src->mem[src_off] != mask) {
-            BLIT_PIXEL_FUNC(dst->mem[y * dst->w + dx], src->mem[src_off]);
-        }
+        BLIT_PIXEL_FUNC(dst->mem[y * dst->w + dx], src->mem[src_off]);
     }
 }
 
@@ -130,14 +127,11 @@ static void FUNC(_blit_scaled_region_row)(bitmap_t* dst, const bitmap_t* src,
 
     float xratio = src_w / (float)dst_w;
 
-    pixel_t mask = get_mask_color();
 
     for (; dx < dx_max && src_x + sx * xratio < sx_max; dx++, sx++) {
         size_t dst_off = dst_y * dst->w + dx;
         size_t src_off = (size_t)(src_y * src->w + src_x + sx * xratio);
-        if (src->mem[src_off] != mask) {
-            BLIT_PIXEL_FUNC(dst->mem[dst_off], src->mem[src_off]);
-        }
+        BLIT_PIXEL_FUNC(dst->mem[dst_off], src->mem[src_off]);
     }
 }
 
@@ -162,34 +156,6 @@ void FUNC(bitmap_scaled_region_blit)(bitmap_t* dst, const bitmap_t* src,
             dst_x, dy, dst_w,
             src_x, src_y + sy * yratio, src_w
         );
-    }
-}
-
-
-static void FUNC(_bitmap_masked_blit_row)(bitmap_t* dst, const bitmap_t* src,
-                                          int dx, int dy, int sy)
-{
-    pixel_t mask = get_mask_color();
-
-    // If `dx` is offscreen, we start to copy the row from '-dx'.
-    int sx = max(0, -dx);
-    dx = max(0, dx);
-    for (; dx < dst->w && sx < src->w; dx++, sx++) {
-        pixel_t p = src->mem[sy * src->w + sx];
-        if (p != mask) {
-            BLIT_PIXEL_FUNC(dst->mem[dy * dst->w + dx], p);
-        }
-    }
-}
-
-
-void FUNC(bitmap_masked_blit)(bitmap_t* dst, const bitmap_t* src,
-                              int x, int y)
-{
-    int sy = max(0, -y);
-    int dy = max(0, y);
-    for (; dy < dst->h && sy < src->h; dy++, sy++) {
-        FUNC(_bitmap_masked_blit_row)(dst, src, x, dy, sy);
     }
 }
 

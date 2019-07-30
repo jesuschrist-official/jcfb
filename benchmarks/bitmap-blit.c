@@ -89,7 +89,7 @@ static float _masked_blit_bench() {
 
     gettimeofday(&start, NULL);
     for (volatile size_t i = 0; i < NITERATIONS; i++) {
-        bitmap_masked_blit(&bmp_a, &bmp_b, 0, 0);
+        bitmap_blit_masked(&bmp_a, &bmp_b, 0, 0);
     }
     gettimeofday(&stop, NULL);
     float elapsed = (stop.tv_sec + stop.tv_usec * 1E-6)
