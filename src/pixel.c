@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "jcfb/pixel.h"
+#include "jcfb/util.h"
 
 
 static pixfmt_t _PIXFMTS[] = {
@@ -148,6 +149,18 @@ bool has_alpha(pixfmt_id_t fmt) {
 
 pixel_t get_mask_color() {
     return 0xff000000;
+}
+
+
+pixel_t pixel_blend_add(pixel_t src, pixel_t dst) {
+    int dr, dg, db;
+    int sr, sg, sb;
+    read_rgb(dst, &dr, &dg, &db);
+    read_rgb(src, &sr, &sg, &sb);
+    dr = min(255, dr + sr);
+    dg = min(255, dg + sg);
+    db = min(255, db + sb);
+    return rgb(dr, dg, db);
 }
 
 

@@ -138,4 +138,10 @@ bool has_alpha(pixfmt_id_t fmt);
 pixel_t get_mask_color();
 
 
+/*
+ * Returns the addition of `dst` on `src`
+ */
+pixel_t pixel_blend_add(pixel_t src, pixel_t dst);
+
+
 #endif

@@ -11,6 +11,7 @@
 #include "jcfb/bitmap.h"
 
 
+/* Regular functions ------------------------------------------------------- */
 /*
  * Draw a horizontal line between points (x1, y) and (x2, y).
  */
@@ -94,6 +95,57 @@ void draw_dashed_vline(bitmap_t* bmp, pixel_t color_a, pixel_t color_b,
 void draw_dashed_rect(bitmap_t* bmp, pixel_t color_a, pixel_t color_b,
                       int x1, int y1, int x2, int y2,
                       int dash_start, int dash_length, int stroke);
+
+
+/* Additive blending functions --------------------------------------------- */
+void draw_hline_blend_add(bitmap_t* bmp, pixel_t color, int x1, int x2, int y);
+
+
+void draw_vline_blend_add(bitmap_t* bmp, pixel_t color,
+                          int x, int y1, int y2);
+
+
+void draw_line_blend_add(bitmap_t* bmp, pixel_t color,
+                         int x1, int y1, int x2, int y2);
+
+
+void draw_rect_blend_add(bitmap_t* bmp, pixel_t color,
+                         int x1, int y1, int x2, int y2);
+
+
+void fill_rect_blend_add(bitmap_t* bmp, pixel_t color,
+                         int x1, int y1, int x2, int y2);
+
+
+void draw_circle_blend_add(bitmap_t* bmp, pixel_t color, int x, int y, int r);
+
+
+void fill_circle_blend_add(bitmap_t* bmp, pixel_t color, int x, int y, int r);
+
+
+void draw_dashed_hline_blend_add(bitmap_t* bmp,
+                                 pixel_t color_a, pixel_t color_b,
+                                 int x1, int x2, int y,
+                                 int dash_start, int dash_length,
+                                 int direction,
+                                 int stroke);
+
+
+void draw_dashed_vline_blend_add(bitmap_t* bmp,
+                                 pixel_t color_a, pixel_t color_b,
+                                 int x, int y1, int y2,
+                                 int dash_start, int dash_length,
+                                 int direction,
+                                 int stroke);
+
+
+void draw_dashed_rect_blend_add(bitmap_t* bmp,
+                                pixel_t color_a, pixel_t color_b,
+                                int x1, int y1, int x2, int y2,
+                                int dash_start, int dash_length, int stroke);
+
+
+/* ------------------------------------------------------------------------- */
 
 
 #endif

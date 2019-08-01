@@ -80,18 +80,6 @@ size_t bitmap_memsize(const bitmap_t* bmp) {
 }
 
 
-static pixel_t _pixel_blend_add(pixel_t dst, pixel_t src) {
-    int dr, dg, db;
-    int sr, sg, sb;
-    read_rgb(dst, &dr, &dg, &db);
-    read_rgb(src, &sr, &sg, &sb);
-    dr = min(255, dr + sr);
-    dg = min(255, dg + sg);
-    db = min(255, db + sb);
-    return rgb(dr, dg, db);
-}
-
-
 void bitmap_put_pixel(bitmap_t* bmp, int x, int y, pixel_t color) {
     if (x < 0 || x >= bmp->w || y < 0 || y >= bmp->h) {
         return;
@@ -104,7 +92,7 @@ void bitmap_put_pixel_blend_add(bitmap_t* bmp, int x, int y, pixel_t color) {
     if (x < 0 || x >= bmp->w || y < 0 || y >= bmp->h) {
         return;
     }
-    bmp->mem[y * bmp->w + x] = _pixel_blend_add(
+    bmp->mem[y * bmp->w + x] = pixel_blend_add(
         bmp->mem[y * bmp->w + x], color
     );
 }
@@ -141,7 +129,7 @@ static void _convert_row(bitmap_t* dst, int x, int dy,
 #include "bitmap-blit.inc.c"
 
 
-#define BLIT_PIXEL_FUNC(_dst, _src) _dst = _pixel_blend_add(_dst, _src)
+#define BLIT_PIXEL_FUNC(_dst, _src) _dst = pixel_blend_add(_dst, _src)
 #define BLIT_FUNC_SUFFIX _blend_add
 #include "bitmap-blit.inc.c"
 

@@ -12,7 +12,6 @@
 #define FUNC(_name) _TCONCAT(_name, PRIMITIVE_FUNC_SUFFIX)
 
 
-// Normal functions ---------------------------------------------------
 void FUNC(draw_hline)(bitmap_t* bmp, pixel_t color, int x1, int x2, int y) {
     if (y < 0 || y >= bmp->h || color == get_mask_color()) {
         return;
@@ -181,11 +180,10 @@ void FUNC(draw_dashed_rect)(bitmap_t* bmp, pixel_t color_a, pixel_t color_b,
     // Could not have a nice effect since bottom & left lines will
     // be drawn in a reverse direction than expected.
 }
-// --------------------------------------------------------------------
 
 
-#undef BLIT_FUNC_SUFFIX
-#undef BLIT_PIXEL_FUNC
+#undef PRIMITIVE_FUNC_SUFFIX
+#undef PRIMITIVE_PIXEL_FUNC
 #undef __TCONCAT
 #undef _TCONCAT
 #undef FUNC
