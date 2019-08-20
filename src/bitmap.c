@@ -6,6 +6,7 @@
  *     This could be used to do regions of bitmaps without memory copy,
  *     allowing for exemple to do clipping.
  */
+#include <math.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -121,6 +122,15 @@ static void _convert_row(bitmap_t* dst, int x, int dy,
         pixel_t new_color = pixel_conv(pixfmt, dst->fmt, old_color);
         dst->mem[dy * dst->w + dx] = new_color;
     }
+}
+
+
+static void _rotate(int x, int y, int cx, int cy, float a, int* rx, int* ry) {
+    int dx = x - cx;
+    int dy = y - cy;
+
+    *rx = cx + cos(a) * dx - sin(a) * dy;
+    *ry = cy + sin(a) * dx + cos(a) * dy;
 }
 
 

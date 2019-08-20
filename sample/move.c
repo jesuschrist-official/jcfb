@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
     }
     int player_x = 640 / 2 - player.w / 2,
         player_y = 400 / 2 - player.h / 2;
+    float angle = 0.0f;
 
     int exit = 0;
     while (!exit) {
@@ -47,14 +48,14 @@ int main(int argc, char** argv) {
             player_x += 16;
         }
         bitmap_clear(&buffer, 0x00000000);
-        bitmap_scaled_region_blit(
+        bitmap_rotated_blit_masked(
             &buffer, &player,
-            5, 0, 55, 56,
-            player_x, player_y, 32, 32);
+            player_x, player_y, angle);
         bitmap_scaled_blit(&screen, &buffer, 0, 0,
                            screen.w, screen.h);
         jcfb_refresh(&screen);
         usleep(1000);
+        angle += 0.01f;
     }
 
     bitmap_wipe(&player);

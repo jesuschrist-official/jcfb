@@ -65,7 +65,7 @@ samples: $(PRINT) $(MANDELBROT) $(TETRIS) $(TTF) $(MOVE) $(KEYBOARD) \
 
 
 $(PRINT): $(JCFB) $(DSAMPLE)/print.c
-	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS)
+	$(CC) $(CFLAGS) -L$(DBUILD) $^ -o $@ -ljcfb $(LDFLAGS) -lm
 
 
 $(MANDELBROT): $(JCFB) $(DSAMPLE)/mandelbrot.c
@@ -116,7 +116,7 @@ benchmarks: $(DBUILD)/$(DBENCH)/pixel-conversion.bench \
 
 
 $(DBUILD)/$(DBENCH)/%.bench: $(DBENCH)/%.c
-	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb
+	$(CC) $(CFLAGS) $^ -o $@ -L$(DBUILD) -ljcfb -lm
 
 
 $(DBUILD):

@@ -211,6 +211,35 @@ void FUNC(bitmap_blit_hflip)(bitmap_t* dst, const bitmap_t* src, int x, int y)
     }
 }
 
+
+void FUNC(bitmap_rotated_blit)(bitmap_t* dst, const bitmap_t* src,
+                               int cx, int cy, float a)
+{
+    for (int y = 0; y < src->h; y++) {
+        for (int x = 0; x < src->w; x++) {
+            int rx, ry;
+            _rotate(x, y, src->w / 2, src->h / 2, a, &rx, &ry);
+            int dx = cx - src->w / 2 + rx;
+            int dy = cy - src->h / 2 + ry;
+            if (dx < 0 || dx >= dst->w || dy < 0 || dy >= dst->h) {
+                continue;
+            }
+            const pixel_t* src_addr = src->mem + y * src->w + x;
+
+            pixel_t* dest_addr = dst->mem + dy * dst->w + dx;
+            BLIT_PIXEL_FUNC(*dest_addr, *src_addr);
+
+            // A pixel can be "between" two real pixels, so we fill the next
+            // one on the line to avoid black holes. Magic!
+            if (dx + 1 < dst->w && x + 1 < src->w) {
+                dest_addr = dst->mem + dy * dst->w + dx + 1;
+                BLIT_PIXEL_FUNC(*dest_addr, *src_addr);
+            }
+        }
+    }
+}
+
+
 #undef BLIT_FUNC_SUFFIX
 #undef BLIT_PIXEL_FUNC
 #undef __TCONCAT

@@ -152,6 +152,13 @@ void bitmap_masked_blit(bitmap_t* dst, const bitmap_t* src,
 void bitmap_blit_hflip(bitmap_t* dst, const bitmap_t* src, int x, int y);
 
 
+/*
+ * Blit the `src` bitmap around the point `(cx, cy)` with a rotation of `a`
+ * radiants.
+ */
+void bitmap_rotated_blit(bitmap_t* dst, const bitmap_t* src,
+                         int cx, int cy, float a);
+
 
 /* Additive blend blits ---------------------------------------------------- */
 void bitmap_blit_blend_add(bitmap_t* dst, const bitmap_t* src, int x, int y);
@@ -174,6 +181,10 @@ void bitmap_blit_hflip_blend_add(bitmap_t* dst, const bitmap_t* src,
                                  int x, int y);
 
 
+void bitmap_rotated_blit_blend_add(bitmap_t* dst, const bitmap_t* src,
+                                   int cx, int cy, float a);
+
+
 /* Masked blits ------------------------------------------------------------ */
 void bitmap_blit_masked(bitmap_t* dst, const bitmap_t* src, int x, int y);
 
@@ -193,6 +204,10 @@ void bitmap_masked_blit_masked(bitmap_t* dst, const bitmap_t* src,
 
 void bitmap_blit_hflip_masked(bitmap_t* dst, const bitmap_t* src,
                               int x, int y);
+
+
+void bitmap_rotated_blit_masked(bitmap_t* dst, const bitmap_t* src,
+                                int cx, int cy, float a);
 
 
 /* ------------------------------------------------------------------------- */
