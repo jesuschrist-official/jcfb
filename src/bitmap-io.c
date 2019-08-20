@@ -32,7 +32,7 @@ int bitmap_load(bitmap_t* bmp, const char* path) {
             // Inverse alpha-component (0 means full color, 1 no color)
             *src = (*src & 0x00ffffff) | ((0xff - (*src >> 24)) << 24);
             *dst = pixel_conv(PIXFMT_RGBA32, bmp->fmt, *src);
-            if (!alpha && (*src & 0xff000000) == 0xff000000) {
+            if (!alpha && (*src & 0xff00ff) == 0xff00ff) {
                 // XXX this can lead to bugs if RGB24 is not encoded
                 //     as I think it should be :p
                 *dst = 0xff000000;
